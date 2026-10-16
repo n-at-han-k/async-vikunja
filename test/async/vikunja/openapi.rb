@@ -5,10 +5,16 @@ require "async/vikunja/openapi"
 describe Async::Vikunja::OpenAPI do
   let(:openapi) {subject}
 
+  let(:pinned) {::File.read(::File.expand_path("../../../docker-compose.yml", __dir__))[%r{image: vikunja/vikunja:(\S+)}, 1]}
+
   it "reads the vendored v2 document" do
-    expect(openapi.version).to be == "v2.6.0"
+    expect(openapi.version).to be(:start_with?, "v2.")
     expect(openapi.prefix).to be == "/api/v2"
     expect(openapi.routes).not.to be(:empty?)
+  end
+
+  it "describes the release the tests are run against" do
+    expect(openapi.version.delete_prefix("v")).to be == pinned
   end
 
   with "#route_for" do

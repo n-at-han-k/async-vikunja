@@ -58,6 +58,12 @@ module Async
       def started_at = self.value[:started_at]
 
       def finished_at = self.value[:finished_at]
+
+      def error_kind = self.value[:error_kind]
+
+      def error_message = self.value[:error_message]
+
+      def failed? = !self.error_kind.nil?
     end
 
     module Migration

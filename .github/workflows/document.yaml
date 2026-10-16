@@ -43,7 +43,9 @@ jobs:
         run: nix develop --command bundle exec sus
 
       - name: Every entity the document describes has a representation
+        if: ${{ !cancelled() }}
         run: nix develop --command bundle exec rubocop --cache false
 
       - name: An unimplemented entity and an unreached route each raise
+        if: ${{ !cancelled() }}
         run: nix develop --command ruby bin/check-document-guards

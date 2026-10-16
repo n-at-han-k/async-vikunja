@@ -38,6 +38,8 @@ module Async
 
       def refresh_token = self.submit(AuthToken, self.with(path: "user/token/refresh"), nil)
 
+      def register(payload) = self.submit(User, self.with(path: "register"), payload, identify: nil)
+
       def confirm_email(payload) = self.submit(Message, self.with(path: "user/confirm"), payload)
 
       def reset_password(payload) = self.submit(Message, self.with(path: "user/password/reset"), payload)

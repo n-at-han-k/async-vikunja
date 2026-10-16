@@ -9,7 +9,9 @@ require_relative "buckets"
 require_relative "comments"
 require_relative "error"
 require_relative "filters"
+require_relative "invite_links"
 require_relative "labels"
+require_relative "mcp"
 require_relative "migration"
 require_relative "notifications"
 require_relative "page"
@@ -43,7 +45,9 @@ module Async
       include Auth
       include Bots
       include Filters
+      include InviteLinks
       include Labels
+      include MCP
       include Migration
       include Notifications
       include Projects

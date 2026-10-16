@@ -43,7 +43,11 @@ module Async
     end
 
     module Settings
+      def settings = UserGeneralSettings.new(self.with(path: "user/settings/general"))
+
       def update_settings(payload) = self.submit(UserActionMessageBody, self.with(path: "user/settings/general"), payload, method: :put)
+
+      def patch_settings(payload) = self.merge_patch(UserActionMessageBody, self.with(path: "user/settings/general"), payload)
 
       def avatar_provider = UserAvatarProviderBody.new(self.with(path: "user/settings/avatar/provider"))
 

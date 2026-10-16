@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    async-vikunja (0.1.0)
+    async-vikunja (1.0.0)
       async-rest (~> 0.20)
       gem_kit (~> 0.2)
 

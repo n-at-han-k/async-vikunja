@@ -5,6 +5,6 @@
 
 module Async
   module Vikunja
-    VERSION = "0.1.0"
+    VERSION = "1.0.0"
   end
 end

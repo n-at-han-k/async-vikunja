@@ -14,7 +14,7 @@ services:
 
       VIKUNJA_SERVICE_PUBLICURL: "http://localhost:${VIKUNJA_PORT:-3466}/"
       VIKUNJA_SERVICE_INTERFACE: ":3456"
-      VIKUNJA_SERVICE_JWTSECRET: async-vikunja-test-secret
+      VIKUNJA_SERVICE_SECRET: async-vikunja-test-secret
       VIKUNJA_SERVICE_ENABLEREGISTRATION: "false"
 
       VIKUNJA_MAILER_ENABLED: "false"

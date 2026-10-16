@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Everything Vikunja v2.7.0 added to the document. Invite links are the admin's:
+  `#invite_links` lists what has been issued, `#create_invite_link` issues one,
+  `#remove_invite_link` revokes it, and `#invite_link_teams` lists the teams a
+  link can grant membership of. `#check_invite_link(token)` reads the public
+  view of a link, which is what an invitee sees before registering.
+- `#register(payload)`, for the instance that accepts registrations, answering
+  with the `User` it created.
+- `#mcp_info`, describing where a model context protocol client connects and
+  which token presets it may use, as `Async::Vikunja::ConnectionSettings` and
+  `Async::Vikunja::TokenPresets`.
+- `#settings` and `#patch_settings`, now that the general settings have a `GET`
+  and a merge patch of their own rather than only arriving nested on the user.
+- `Async::Vikunja::Status#error_kind`, `#error_message` and `#failed?`, so a
+  migration says how it failed rather than only that it finished.
+
+### Changed
+
+- `data/openapi-v2.json` describes v2.7.0, and `docker-compose.yml` pins the
+  release matching it. The `{projecttask}` path parameter the task endpoints
+  used is now `{task}`, which changes no call this gem makes.
+- `docker-compose.yml` sets `VIKUNJA_SERVICE_SECRET`; `VIKUNJA_SERVICE_JWTSECRET`
+  is deprecated and warns on start-up.
+
 ## [1.0.0] - 2026-10-16
 
 ### Added

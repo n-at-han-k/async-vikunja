@@ -1,0 +1,32 @@
+# Released under the MIT License.
+# Copyright, 2026, by Nathan Kidd.
+
+# Pinned to the release matching data/openapi-v2.json (API v2.6.0).
+
+services:
+  vikunja:
+    image: vikunja/vikunja:2.6.0
+    ports:
+      - "127.0.0.1:${VIKUNJA_PORT:-3466}:3456"
+    environment:
+      VIKUNJA_DATABASE_TYPE: sqlite
+      VIKUNJA_DATABASE_PATH: /db/vikunja.db
+
+      VIKUNJA_SERVICE_PUBLICURL: "http://localhost:${VIKUNJA_PORT:-3466}/"
+      VIKUNJA_SERVICE_INTERFACE: ":3456"
+      VIKUNJA_SERVICE_JWTSECRET: async-vikunja-test-secret
+      VIKUNJA_SERVICE_ENABLEREGISTRATION: "false"
+
+      VIKUNJA_MAILER_ENABLED: "false"
+      VIKUNJA_RATELIMIT_ENABLED: "false"
+
+      TZ: UTC
+    tmpfs:
+      - /db:uid=1000,gid=1000
+      - /app/vikunja/files:uid=1000,gid=1000
+    healthcheck:
+      test: ["CMD", "/app/vikunja/vikunja", "healthcheck"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 5s

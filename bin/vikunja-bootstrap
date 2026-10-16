@@ -1,0 +1,90 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Released under the MIT License.
+# Copyright, 2026, by Nathan Kidd.
+
+require "json"
+require "net/http"
+require "open3"
+
+module Bootstrap
+  PORT = ENV.fetch("VIKUNJA_PORT", "3466")
+  URL = ENV.fetch("VIKUNJA_URL", "http://localhost:#{PORT}/api/v2/")
+  USERNAME = ENV.fetch("VIKUNJA_USERNAME", "tester")
+  PASSWORD = ENV.fetch("VIKUNJA_PASSWORD", "test-password-123")
+
+  def self.request(method, path, body = nil, token: nil)
+    uri = URI.join(URL, path)
+
+    request = Net::HTTP.const_get(method).new(uri)
+    request["accept"] = "application/json"
+    if token
+      request["authorization"] = "Bearer #{token}"
+    end
+
+    if body
+      request["content-type"] = "application/json"
+      request.body = ::JSON.dump(body)
+    end
+
+    response = Net::HTTP.start(uri.hostname, uri.port){|http| http.request(request)}
+
+    unless response.code.start_with?("2")
+      abort "#{method.upcase} #{uri} failed: #{response.code} #{response.body}"
+    end
+
+    ::JSON.parse(response.body, symbolize_names: true)
+  end
+
+  def self.create_user
+    output, status = Open3.capture2e(
+      "docker", "compose", "exec", "-T", "vikunja",
+      "/app/vikunja/vikunja", "user", "create",
+      "-u", USERNAME, "-p", PASSWORD, "-e", "#{USERNAME}@example.com",
+    )
+
+    created = status.success? || output.include?("already exists")
+
+    unless created
+      abort "could not create #{USERNAME}: #{output}"
+    end
+  end
+
+  # Every permission the instance offers, because a test asserting a 403 should be asserting
+  # the server's rules rather than a gap in the token it was handed.
+  def self.permissions(token)
+    request(:Get, "routes", token: token).each_with_object({}) do |(group, routes), collected|
+      if group == :$schema
+        next
+      end
+
+      collected[group] = routes.keys
+    end
+  end
+
+  def self.call
+    create_user
+
+    jwt = request(:Post, "login", {username: USERNAME, password: PASSWORD, long_token: true})
+      .fetch(:token)
+
+    created = request(:Post, "tokens", {
+      title: "async-vikunja integration tests",
+      expires_at: (Time.now.utc + (24 * 60 * 60)).iso8601,
+      permissions: permissions(jwt),
+    }, token: jwt)
+
+    api_token = created.fetch(:token)
+
+    message = request(:Get, "token/test", token: api_token).fetch(:message)
+    warn "token/test: #{message}"
+
+    puts "export VIKUNJA_URL=#{URL}"
+    puts "export VIKUNJA_TOKEN=#{api_token}"
+  end
+end
+
+require "time"
+
+Bootstrap.call

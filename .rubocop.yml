@@ -1,0 +1,225 @@
+# Note: async-rest also uses rubocop-md, which is not in this project's Gemfile.
+plugins:
+  - rubocop-socketry
+
+require:
+  - ./cops/begin_block_assignment.rb
+  - ./cops/no_conditional_assignment.rb
+  - ./cops/no_modifier_if.rb
+  - ./cops/no_return.rb
+  - ./cops/use_tap.rb
+  - ./cops/comment_structure.rb
+  - ./cops/single_line_methods_for_events.rb
+  - ./cops/entity_has_representation.rb
+  - ./cops/accessor_matches_schema.rb
+  - ./cops/accessor_names_property.rb
+  - ./cops/shadowed_constant.rb
+  - ./cops/create_identifies_resource.rb
+
+inherit_from:
+  - .rubocop_todo.yml
+
+AllCops:
+  DisabledByDefault: true
+
+AsyncVikunja/EntityHasRepresentation:
+  Enabled: true
+  Include:
+    - "lib/async/vikunja.rb"
+
+AsyncVikunja/AccessorMatchesSchema:
+  Enabled: true
+  Include:
+    - "lib/**/*.rb"
+
+AsyncVikunja/AccessorNamesProperty:
+  Enabled: true
+  Include:
+    - "lib/**/*.rb"
+
+AsyncVikunja/CreateIdentifiesResource:
+  Enabled: true
+  Include:
+    - "lib/**/*.rb"
+
+AsyncVikunja/ShadowedConstant:
+  Enabled: true
+  Include:
+    - "lib/**/*.rb"
+    - "fixtures/**/*.rb"
+    - "test/**/*.rb"
+
+# Socketry specific rules:
+
+# Indenting blank lines means trailing whitespace once indentation is spaces rather than tabs:
+Layout/ConsistentBlankLineIndentation:
+  Enabled: false
+
+Layout/BlockDelimiterSpacing:
+  Enabled: true
+
+Style/GlobalExceptionVariables:
+  Enabled: true
+
+# General Layout rules:
+
+Layout/IndentationStyle:
+  Enabled: true
+  EnforcedStyle: spaces
+
+Layout/InitialIndentation:
+  Enabled: true
+
+Layout/IndentationWidth:
+  Enabled: true
+  Width: 2
+
+Layout/IndentationConsistency:
+  Enabled: true
+  EnforcedStyle: normal
+
+Layout/BlockAlignment:
+  Enabled: true
+
+Layout/EndAlignment:
+  Enabled: true
+  EnforcedStyleAlignWith: start_of_line
+
+Layout/BeginEndAlignment:
+  Enabled: true
+  EnforcedStyleAlignWith: start_of_line
+
+Layout/RescueEnsureAlignment:
+  Enabled: true
+
+Layout/ElseAlignment:
+  Enabled: true
+
+Layout/DefEndAlignment:
+  Enabled: true
+
+Layout/CaseIndentation:
+  Enabled: true
+  EnforcedStyle: end
+
+Layout/CommentIndentation:
+  Enabled: true
+
+Layout/FirstHashElementIndentation:
+  Enabled: true
+  EnforcedStyle: consistent
+
+Layout/EmptyLinesAroundClassBody:
+  Enabled: true
+
+Layout/EmptyLinesAroundModuleBody:
+  Enabled: true
+
+Layout/EmptyLineAfterMagicComment:
+   Enabled: true
+
+Layout/SpaceInsideBlockBraces:
+  Enabled: true
+  EnforcedStyle: no_space
+  SpaceBeforeBlockParameters: false
+
+Layout/SpaceAroundBlockParameters:
+  Enabled: true
+  EnforcedStyleInsidePipes: no_space
+
+Layout/FirstArrayElementIndentation:
+  Enabled: true
+  EnforcedStyle: consistent
+
+Layout/ArrayAlignment:
+  Enabled: true
+  EnforcedStyle: with_fixed_indentation
+
+Layout/FirstArgumentIndentation:
+  Enabled: true
+  EnforcedStyle: consistent
+
+Layout/ArgumentAlignment:
+  Enabled: true
+  EnforcedStyle: with_fixed_indentation
+
+Layout/ClosingParenthesisIndentation:
+  Enabled: true
+
+Layout/TrailingWhitespace:
+  Enabled: true
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/StringLiterals:
+  Enabled: true
+  EnforcedStyle: double_quotes
+
+# House style, shared with ratalada.
+
+# Bans assigning a `begin...end` expression; the assignment goes inside the block.
+Local/BeginBlockAssignment:
+  Enabled: true
+
+# Bans assigning an `if` / `case` expression; assign inside each branch instead.
+Local/NoConditionalAssignment:
+  Enabled: true
+
+# Bans modifier `if` / `unless`, so a guard cannot hide off the right edge of a long line.
+Local/NoModifierIf:
+  Enabled: true
+
+# Bans `return`. The method's last expression is its return value, and guards are structural.
+Local/NoReturn:
+  Enabled: true
+
+# Requires `tap` where a method assigns a local on its first line and returns it on its last.
+Local/UseTap:
+  Enabled: true
+
+# How a comment is built: measured against how async-rest, async-discord and async-ollama document
+# themselves, and parsed by decode so that an annotation is whatever decode recognises as one.
+#
+# A paragraph is one line however long - none of the 99 summary paragraphs in those projects is
+# wrapped, and async-rest's reach 544 characters. A summary is short, and no longer than the code it
+# describes earns: ten words, plus three per line of body, to a ceiling of thirty, which fits all 76
+# of their documented methods bar one. A module gets ten words, which is exactly what the one
+# commented module in async-rest uses. And a method described in prose documents its signature with
+# annotations rather than leaving it to the reader.
+#
+# Nothing is corrected automatically: a comment which breaks these has to be rewritten.
+Local/CommentStructure:
+  Enabled: true
+
+  # The word allowances: ten words, plus three per line of method body, to a ceiling of thirty. A
+  # module gets ten whatever its size.
+  MaximumWords: 30
+  BaseWords: 10
+  WordsPerLine: 3
+  ModuleWords: 10
+
+  # Each check is scoped on its own. No `Include` means everywhere; an `Include` narrows it, and
+  # `Exclude` then removes paths from what is left.
+  #
+  # A script in `bin` carries its documentation as a man page - the rendered output, as a comment -
+  # whose lines are wrapped and whose summaries are as long as the page needs by the formatter
+  # rather than by hand, so neither check applies there.
+  Wrapping:
+    Enabled: true
+    Exclude:
+      - "bin/*"
+
+  Length:
+    Enabled: true
+    Exclude:
+      - "bin/*"
+
+  # Annotations document an interface, so they are asked for where there is one. A script in `bin`
+  # and a case in `test` are called by nobody, and the generated layers under `abstract` carry the
+  # annotations of the methods they override.
+  Annotations:
+    Enabled: true
+    Include:
+      - "lib/**/*.rb"
+      - "fixtures/**/*.rb"

@@ -5,7 +5,7 @@ require "json"
 module Async
   module Vikunja
     module OpenAPI
-      DOCUMENT = ::File.expand_path("../../../data/openapi-v2.json", __dir__)
+      DOCUMENT = ENV.fetch("VIKUNJA_OPENAPI", ::File.expand_path("../../../data/openapi-v2.json", __dir__))
 
       METHODS = ["get", "post", "put", "patch", "delete", "head", "options"].freeze
 

@@ -1,0 +1,96 @@
+name: OpenAPI
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+
+    outputs:
+      sha: ${{ steps.commit.outputs.sha }}
+      version: ${{ steps.extract.outputs.version }}
+      changed: ${{ steps.commit.outputs.changed }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start the latest Vikunja
+        run: |
+          docker run --detach --name vikunja --publish 127.0.0.1:3456:3456 \
+            --env VIKUNJA_DATABASE_TYPE=sqlite \
+            --env VIKUNJA_DATABASE_PATH=/db/vikunja.db \
+            --env VIKUNJA_SERVICE_PUBLICURL=https://vikunja.local/ \
+            --env VIKUNJA_SERVICE_INTERFACE=:3456 \
+            --env VIKUNJA_SERVICE_SECRET=async-vikunja-openapi-extract \
+            --env VIKUNJA_SERVICE_ENABLEREGISTRATION=false \
+            --env VIKUNJA_MAILER_ENABLED=false \
+            --env VIKUNJA_RATELIMIT_ENABLED=false \
+            --env TZ=UTC \
+            --tmpfs /db:uid=1000,gid=1000 \
+            --tmpfs /app/vikunja/files:uid=1000,gid=1000 \
+            vikunja/vikunja:latest
+
+      - name: Wait for it to answer
+        run: |
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error http://localhost:3456/api/v2/info > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs vikunja
+          exit 1
+
+      - name: Extract the document
+        id: extract
+        run: |
+          curl --fail --silent --show-error \
+            --header "accept: application/openapi+json" \
+            http://localhost:3456/api/v2/openapi.json > live.json
+
+          jq -e '(.paths | length) > 100 and (.components.schemas | length) > 100' live.json > /dev/null
+
+          version="$(jq -r '.info.version' live.json)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          printf '%s' "$(jq -S . live.json)" > data/openapi-v2.json
+          rm live.json
+
+          sed -i \
+            -e "s|^# Pinned to the release matching data/openapi-v2.json (API .*)\.$|# Pinned to the release matching data/openapi-v2.json (API $version).|" \
+            -e "s|^\( *image: vikunja/vikunja:\).*$|\1${version#v}|" \
+            docker-compose.yml
+
+      - name: Commit it if it differs
+        id: commit
+        run: |
+          if git diff --quiet -- data/openapi-v2.json docker-compose.yml; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "sha=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+            echo "The document is already what ${{ steps.extract.outputs.version }} publishes."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit --quiet -m "Update the OpenAPI document to ${{ steps.extract.outputs.version }}" \
+              -- data/openapi-v2.json docker-compose.yml
+            git push --quiet
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            git show --stat --oneline HEAD
+          fi
+
+      - name: Stop it
+        if: always()
+        run: docker rm --force vikunja
+
+  document:
+    needs: extract
+    uses: ./.github/workflows/document.yaml
+    with:
+      ref: ${{ needs.extract.outputs.sha }}

@@ -21,9 +21,10 @@ All code produced or reviewed must conform. Cite rule numbers when reviewing.
 | Document | Rules | Covers |
 |---|---|---|
 | `rules/definitions.md` | 1–10 | The axioms: what a resource, a representation and data each are. Everything else depends on these. **Closed — no further axioms.** |
-| `rules/architecture.md` | 11, 13–17, 22, 26 | Conformance: what REST requires of a client. Breaking one produces a non-conforming client. |
+| `rules/architecture.md` | 11, 13–17, 22, 26, 27 | Conformance: what REST requires of a client. Breaking one produces a non-conforming client. |
 | `rules/errors.md` | 18–21, 23 | Error handling and retry, and the library's three raise sites. |
-| `rules/style.md` | 12, 24, 25 | Where the architecture permits more than one arrangement. Breaking one produces a conforming client that is harder to reason about. |
+| `rules/auth.md` | 28 | Carrying a credential. One rule per technique; a client uses the one its API specifies. |
+| `rules/style.md` | 12, 24, 25, 29 | Where the architecture permits more than one arrangement. Breaking one produces a conforming client that is harder to reason about. |
 
 Read `rules/definitions.md` first. Read the rest when the task touches them.
 

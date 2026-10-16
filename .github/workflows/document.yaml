@@ -1,0 +1,49 @@
+name: Document
+
+on:
+  push:
+    paths: &paths
+      - "data/openapi-v2.json"
+      - "cops/**"
+      - "lib/**"
+      - "fixtures/**"
+      - "test/**"
+      - ".rubocop.yml"
+      - ".rubocop_todo.yml"
+      - "bin/check-document-guards"
+      - ".github/workflows/document.yaml"
+  pull_request:
+    paths: *paths
+  workflow_call:
+    inputs:
+      ref:
+        description: The commit to check, for a caller which has just written one.
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Every documented route is reachable and every representation matches its schema
+        run: nix develop --command bundle exec sus
+
+      - name: Every entity the document describes has a representation
+        run: nix develop --command bundle exec rubocop --cache false
+
+      - name: An unimplemented entity and an unreached route each raise
+        run: nix develop --command ruby bin/check-document-guards

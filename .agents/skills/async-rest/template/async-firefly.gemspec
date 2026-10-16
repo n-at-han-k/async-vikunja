@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = spec.homepage
 
   spec.files = Dir.glob(
-    ["lib/**/*", "license.md"],
+    ["lib/**/*", "license.md", "readme.md"],
     File::FNM_DOTMATCH,
     base: __dir__,
   )

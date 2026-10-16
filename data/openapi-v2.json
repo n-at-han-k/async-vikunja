@@ -513,6 +513,73 @@
         },
         "type": "object"
       },
+      "BotUserUpdateBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "/api/v2/schemas/BotUserUpdateBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "bot_owner_id": {
+            "description": "The id of the owning (human) user. Set by the server on creation; a non-zero value means this user is a bot.",
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "created": {
+            "description": "A timestamp when this user was created. You cannot change this value.",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "email": {
+            "description": "The user's email address. Always empty for bot users.",
+            "maxLength": 250,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique, numeric id of this user.",
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "max_permission": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "name": {
+            "description": "The full name of the user.",
+            "type": "string"
+          },
+          "status": {
+            "description": "The bot's status: 0=active, 2=disabled.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "updated": {
+            "description": "A timestamp when this user was last updated. You cannot change this value.",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "username": {
+            "description": "The username of the user. Is always unique. For bot users it must start with the 'bot-' prefix.",
+            "maxLength": 250,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
       "Bucket": {
         "additionalProperties": false,
         "properties": {
@@ -733,6 +800,91 @@
           "column_name": {
             "description": "The header name of the CSV column, for display.",
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ConnectionSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "/api/v2/schemas/ConnectionSettings.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "endpoint": {
+            "description": "Absolute URL of the streamable HTTP endpoint.",
+            "type": "string"
+          },
+          "presets": {
+            "$ref": "#/components/schemas/TokenPresets"
+          },
+          "routes": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "$ref": "#/components/schemas/RouteDetail"
+              },
+              "type": "object"
+            },
+            "description": "Token permissions usable by exposed MCP tools, including mcp.access.",
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "CreateInviteLinkBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "/api/v2/schemas/CreateInviteLinkBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "expires_at": {
+            "description": "Null means no expiry.",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "max_uses": {
+            "description": "Null allows unlimited registrations.",
+            "format": "int64",
+            "minimum": 1,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "name": {
+            "description": "Name shown to admins and invitees.",
+            "maxLength": 250,
+            "minLength": 1,
+            "type": "string"
+          },
+          "skip_email_confirm": {
+            "description": "Activate accounts without confirming email.",
+            "type": "boolean"
+          },
+          "team_ids": {
+            "description": "Local teams the invitees will join.",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           }
         },
         "type": "object"
@@ -1061,6 +1213,40 @@
           },
           "validated_at": {
             "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InviteLinkCheckBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "/api/v2/schemas/InviteLinkCheckBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "token": {
+            "description": "Secret invitation token.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InviteLinkTeam": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "Numeric team ID.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Team name.",
             "type": "string"
           }
         },
@@ -1984,6 +2170,46 @@
         },
         "type": "object"
       },
+      "PaginatedInviteLinkTeam": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "/api/v2/schemas/PaginatedInviteLinkTeam.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/InviteLinkTeam"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "page": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "per_page": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total_pages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "PaginatedLabelWithTaskID": {
         "additionalProperties": false,
         "properties": {
@@ -2479,6 +2705,46 @@
           "items": {
             "items": {
               "$ref": "#/components/schemas/User"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "page": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "per_page": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total_pages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PaginatedUserInviteLink": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "/api/v2/schemas/PaginatedUserInviteLink.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/UserInviteLink"
             },
             "type": [
               "array",
@@ -3250,6 +3516,39 @@
         },
         "type": "object"
       },
+      "PublicInviteLink": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "/api/v2/schemas/PublicInviteLink.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of this invitation.",
+            "type": "string"
+          },
+          "skip_email_confirm": {
+            "description": "Whether the link activates accounts without email confirmation.",
+            "type": "boolean"
+          },
+          "teams": {
+            "description": "Teams the new account will join.",
+            "items": {
+              "$ref": "#/components/schemas/InviteLinkTeam"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
       "Reaction": {
         "additionalProperties": false,
         "properties": {
@@ -3276,6 +3575,43 @@
           "value": {
             "description": "The reaction itself: any UTF text up to 20 characters, e.g. an emoji.",
             "maxLength": 20,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RegisterUserRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "/api/v2/schemas/RegisterUserRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "email": {
+            "maxLength": 250,
+            "type": "string"
+          },
+          "invite_token": {
+            "description": "Invitation token. Allows registration when public signup is disabled and joins the invited teams.",
+            "type": "string"
+          },
+          "language": {
+            "description": "The language of the new user as an IETF BCP 47 code (e.g. en, de-DE).",
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 72,
+            "minLength": 8,
+            "type": "string"
+          },
+          "username": {
+            "maxLength": 250,
+            "minLength": 3,
             "type": "string"
           }
         },
@@ -3502,6 +3838,16 @@
               "/api/v2/schemas/Status.json"
             ],
             "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "error_kind": {
+            "description": "Why the last migration failed, as a key the client translates: \"reported\", \"interrupted\", \"credentials\", \"queue\", \"upload\" or \"detail\". Empty when it succeeded, is still running or was never run.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "error_message": {
+            "description": "The failure detail, only set when error_kind is \"detail\": the migration failed on the user's own data and this is the error itself, in English.",
             "readOnly": true,
             "type": "string"
           },
@@ -5007,6 +5353,45 @@
         },
         "type": "object"
       },
+      "TokenPresets": {
+        "additionalProperties": false,
+        "properties": {
+          "full": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Wildcard granting all advertised permissions.",
+            "type": "object"
+          },
+          "read_only": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            },
+            "description": "Wildcard permissions expanded against routes.",
+            "type": "object"
+          },
+          "typed": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            },
+            "description": "Exact permissions used by the first-class tools.",
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
       "TokenRequest": {
         "additionalProperties": false,
         "properties": {
@@ -5129,6 +5514,15 @@
       "User": {
         "additionalProperties": false,
         "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "/api/v2/schemas/User.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
           "bot_owner_id": {
             "description": "The id of the owning (human) user. Set by the server on creation; a non-zero value means this user is a bot.",
             "format": "int64",
@@ -5513,6 +5907,84 @@
         },
         "type": "object"
       },
+      "UserInviteLink": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "/api/v2/schemas/UserInviteLink.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "created": {
+            "description": "Creation timestamp.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/User",
+            "description": "The admin who created this link; null if their account was deleted.",
+            "readOnly": true
+          },
+          "expires_at": {
+            "description": "Null means no expiry.",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Numeric link ID.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "max_uses": {
+            "description": "Null allows unlimited registrations.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "name": {
+            "description": "Name shown to admins and invitees.",
+            "type": "string"
+          },
+          "skip_email_confirm": {
+            "description": "Activate invitees without confirming their email.",
+            "type": "boolean"
+          },
+          "teams": {
+            "description": "Teams the invitee will join.",
+            "items": {
+              "$ref": "#/components/schemas/InviteLinkTeam"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "token": {
+            "description": "Secret token, returned only on creation.",
+            "type": "string"
+          },
+          "updated": {
+            "description": "Last update timestamp.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "uses": {
+            "description": "Completed registrations.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "UserWithPermission": {
         "additionalProperties": false,
         "properties": {
@@ -5701,9 +6173,7 @@
           "enabled_pro_features": {
             "description": "The licensed pro features enabled on this instance.",
             "items": {
-              "format": "int64",
-              "minimum": 0,
-              "type": "integer"
+              "type": "string"
             },
             "type": [
               "array",
@@ -5868,10 +6338,157 @@
   "info": {
     "description": "## Rich-text fields\n\nDescriptions (task, project, label, team, saved filter) and task comments are stored as HTML. Add `?format=markdown` to read and write them as GFM Markdown instead; on write it is converted to HTML and `@mentions` resolved to existing users. On `PATCH`, send the `X-Vikunja-Format: markdown` header instead (merge-patch drops query parameters). CalDAV always exchanges task descriptions as Markdown.\n\nWriting is lossy: Markdown can't express every HTML construct (e.g. underline), so a field you send as Markdown is stored as its converted HTML — formatting Markdown can't represent is dropped. Omit a field, or use `format=html`, to leave it untouched (note a full `PUT` and `PATCH` round-trip the whole resource, so send `format=html` unless you actually edited the rich-text fields). Unknown `@mentions` stay as plain text.",
     "title": "Vikunja API",
-    "version": "v2.6.0"
+    "version": "v2.7.0"
   },
   "openapi": "3.1.0",
   "paths": {
+    "/admin/invite-links": {
+      "get": {
+        "description": "Requires an instance admin and the admin_panel and user_invites features. Secret tokens are never returned.",
+        "operationId": "admin-invite-links-list",
+        "parameters": [
+          {
+            "description": "1-based page number.",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number.",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
+            "explode": false,
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Search query; filters the list to items matching this string.",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Search query; filters the list to items matching this string.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedUserInviteLink"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List invite links",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "description": "Requires an instance admin and both licensed features. Returns the secret token once. Invitees can register even when public registration is disabled.",
+        "operationId": "admin-invite-links-create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInviteLinkBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInviteLink"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create an invite link",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/invite-links/{id}": {
+      "delete": {
+        "description": "Requires an instance admin and both licensed features. Prevents further use without affecting users who already registered.",
+        "operationId": "admin-invite-links-delete",
+        "parameters": [
+          {
+            "description": "Numeric invite link ID.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Numeric invite link ID.",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete an invite link",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/admin/overview": {
       "get": {
         "description": "Returns per-instance counts (users, projects, tasks, teams, shares) plus the current license snapshot. Restricted to instance admins on a licensed instance; unlicensed or non-admin callers get a 404, making the endpoint indistinguishable from one that is not registered.",
@@ -5906,7 +6523,7 @@
     },
     "/admin/projects": {
       "get": {
-        "description": "Returns every project on the instance, including archived ones and projects the caller does not own. Restricted to instance admins on a licensed instance; unlicensed or non-admin callers get a 404, making the endpoint indistinguishable from one that is not registered.",
+        "description": "Returns every project on the instance, including archived ones and projects the caller does not own. q matches title, description and identifier (or a comma-separated list of IDs). Restricted to instance admins on a licensed instance; unlicensed or non-admin callers get a 404, making the endpoint indistinguishable from one that is not registered.",
         "operationId": "admin-projects-list",
         "parameters": [
           {
@@ -5923,15 +6540,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -5944,6 +6559,71 @@
             "schema": {
               "description": "Search query; filters the list to items matching this string.",
               "type": "string"
+            }
+          },
+          {
+            "description": "Only return projects owned by this user.",
+            "explode": false,
+            "in": "query",
+            "name": "owner_id",
+            "schema": {
+              "description": "Only return projects owned by this user.",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Hide projects that are their owner's default project.",
+            "explode": false,
+            "in": "query",
+            "name": "exclude_default_projects",
+            "schema": {
+              "description": "Hide projects that are their owner's default project.",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Fields to sort by. Repeatable; pair positionally with order_by. owner sorts by the owner's username. Defaults to id descending.",
+            "explode": true,
+            "in": "query",
+            "name": "sort_by",
+            "schema": {
+              "description": "Fields to sort by. Repeatable; pair positionally with order_by. owner sorts by the owner's username. Defaults to id descending.",
+              "items": {
+                "enum": [
+                  "id",
+                  "title",
+                  "owner",
+                  "created",
+                  "updated"
+                ],
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Sort order per sort_by field. Repeatable; defaults to asc.",
+            "explode": true,
+            "in": "query",
+            "name": "order_by",
+            "schema": {
+              "description": "Sort order per sort_by field. Repeatable; defaults to asc.",
+              "items": {
+                "enum": [
+                  "asc",
+                  "desc"
+                ],
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
             }
           }
         ],
@@ -6030,6 +6710,75 @@
         ]
       }
     },
+    "/admin/teams": {
+      "get": {
+        "description": "Includes teams the admin does not belong to. Excludes externally managed teams. Requires admin_panel and user_invites.",
+        "operationId": "admin-teams-list",
+        "parameters": [
+          {
+            "description": "1-based page number.",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number.",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
+            "explode": false,
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Search query; filters the list to items matching this string.",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Search query; filters the list to items matching this string.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedInviteLinkTeam"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List local teams for invitations",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/admin/users": {
       "get": {
         "description": "Returns every user on the instance, paginated, with q matched against username and email. Exposes fields hidden from the normal user API (is_admin, status, auth provider). Each call is recorded in the audit log, since the response contains every user's email address. Restricted to instance admins on a licensed instance; unlicensed or non-admin callers get a 404, making the endpoint indistinguishable from one that is not registered.",
@@ -6049,15 +6798,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -6983,6 +7730,49 @@
         ]
       }
     },
+    "/invite-links/check": {
+      "post": {
+        "description": "Available without authentication, even when public registration is disabled. Invalid, expired, exhausted and unlicensed links all return 404.",
+        "operationId": "invite-links-check",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteLinkCheckBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicInviteLink"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [],
+        "summary": "Check an invitation",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/labels": {
       "get": {
         "description": "Returns the labels visible to the authenticated user — their own plus any used on tasks they can access. Not a global list.",
@@ -7002,15 +7792,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -7596,6 +8384,38 @@
         ]
       }
     },
+    "/mcp/info": {
+      "get": {
+        "description": "Returns the endpoint and usable token permissions with presets derived from exposed tools. Requires a user session; API tokens and link shares are rejected.",
+        "operationId": "mcp-info",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionSettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get MCP connection settings",
+        "tags": [
+          "mcp"
+        ]
+      }
+    },
     "/migration/csv/detect": {
       "post": {
         "description": "Analyzes an uploaded CSV file and returns its detected columns, delimiter, quote character and date format, plus a suggested column-to-attribute mapping the client can edit before previewing or migrating. Read-only: nothing is imported.",
@@ -7624,7 +8444,8 @@
                 "type": "object"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -7656,7 +8477,7 @@
     },
     "/migration/csv/migrate": {
       "post": {
-        "description": "Imports the tasks from the uploaded CSV file into Vikunja using the given config. The import runs synchronously and returns once it has finished.",
+        "description": "Imports the tasks from the uploaded CSV file into Vikunja using the given config. The import runs in the background: the response only confirms it started. Poll the status endpoint for completion; the user is notified by mail when it finishes or fails.",
         "operationId": "migration-csv-migrate",
         "requestBody": {
           "content": {
@@ -7690,7 +8511,8 @@
                 "type": "object"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -7756,7 +8578,8 @@
                 "type": "object"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -7894,7 +8717,7 @@
     },
     "/migration/ticktick/migrate": {
       "post": {
-        "description": "Imports the authenticated user's data from an uploaded export file into Vikunja. Send the file under the multipart \"import\" field. The import runs synchronously and returns once it has finished.",
+        "description": "Imports the authenticated user's data from an uploaded export file into Vikunja. Send the file under the multipart \"import\" field. The upload is validated, then the import runs in the background: the response only confirms it started. Poll the status endpoint for completion; the user is notified by mail when it finishes or fails.",
         "operationId": "migration-ticktick-migrate",
         "requestBody": {
           "content": {
@@ -7920,7 +8743,8 @@
                 "type": "object"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -7984,7 +8808,7 @@
     },
     "/migration/vikunja-file/migrate": {
       "post": {
-        "description": "Imports the authenticated user's data from an uploaded export file into Vikunja. Send the file under the multipart \"import\" field. The import runs synchronously and returns once it has finished.",
+        "description": "Imports the authenticated user's data from an uploaded export file into Vikunja. Send the file under the multipart \"import\" field. The upload is validated, then the import runs in the background: the response only confirms it started. Poll the status endpoint for completion; the user is notified by mail when it finishes or fails.",
         "operationId": "migration-vikunja-file-migrate",
         "requestBody": {
           "content": {
@@ -8010,7 +8834,8 @@
                 "type": "object"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -8074,7 +8899,7 @@
     },
     "/migration/wekan/migrate": {
       "post": {
-        "description": "Imports the authenticated user's data from an uploaded export file into Vikunja. Send the file under the multipart \"import\" field. The import runs synchronously and returns once it has finished.",
+        "description": "Imports the authenticated user's data from an uploaded export file into Vikunja. Send the file under the multipart \"import\" field. The upload is validated, then the import runs in the background: the response only confirms it started. Poll the status endpoint for completion; the user is notified by mail when it finishes or fails.",
         "operationId": "migration-wekan-migrate",
         "requestBody": {
           "content": {
@@ -8100,7 +8925,8 @@
                 "type": "object"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -8204,15 +9030,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -8489,15 +9313,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -9081,15 +9903,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -9317,7 +10137,8 @@
                 "type": "object"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -9375,15 +10196,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -9427,7 +10246,7 @@
         ]
       },
       "post": {
-        "description": "Creates a link share for the given project. The parent project is taken from the URL, not the body, and the authenticated user becomes the sharer. Creating an admin share requires project admin; read/write shares require write access. The hash is generated by the server; a password, if set, is write-only and cannot be read back.",
+        "description": "Creates a link share for the given project. The parent project is taken from the URL, not the body, and the authenticated user becomes the sharer. Requires project admin. The hash is generated by the server; a password, if set, is write-only and cannot be read back.",
         "operationId": "shares-create",
         "parameters": [
           {
@@ -9480,7 +10299,7 @@
     },
     "/projects/{project}/shares/{share}": {
       "delete": {
-        "description": "Deletes a link share of a project. The share must belong to the project in the path. Requires write access to the project.",
+        "description": "Deletes a link share of a project. The share must belong to the project in the path. Requires project admin.",
         "operationId": "shares-delete",
         "parameters": [
           {
@@ -9660,15 +10479,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -9951,7 +10768,7 @@
     },
     "/projects/{project}/tasks/by-index/{index}": {
       "get": {
-        "description": "Returns a single task addressed by its per-project index. The {project} segment accepts either a numeric project id or a textual project identifier (e.g. \"PROJ\"); a value made solely of digits is always treated as an id. Embed extra, more expensive data in each task. Repeatable. One of: subtasks, buckets, reactions, comments, comment_count, time_entries_count, is_unread. Expanding can return more tasks than the page limit (subtasks) and inflate the response.",
+        "description": "Returns a single task addressed by its per-project index. Historical addresses redirect. The {project} segment accepts either a numeric project id or a textual project identifier (e.g. \"PROJ\"); a value made solely of digits is always treated as an id. Embed extra, more expensive data in each task. Repeatable. One of: subtasks, buckets, reactions, comments, comment_count, time_entries_count, is_unread. Expanding can return more tasks than the page limit (subtasks) and inflate the response.",
         "operationId": "tasks-read-by-index",
         "parameters": [
           {
@@ -10083,6 +10900,24 @@
               }
             }
           },
+          "307": {
+            "description": "Historical address; Location holds the task's current one.",
+            "headers": {
+              "Cache-Control": {
+                "description": "no-store",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Location": {
+                "description": "Current v2 by-index address, query string preserved.",
+                "schema": {
+                  "format": "uri-reference",
+                  "type": "string"
+                }
+              }
+            }
+          },
           "default": {
             "content": {
               "application/problem+json": {
@@ -10128,15 +10963,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -10364,15 +11197,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -10651,15 +11482,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -11259,15 +12088,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -11412,15 +12239,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -11800,15 +12625,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -11981,15 +12804,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -12186,6 +13007,49 @@
         "summary": "Update a webhook target's events",
         "tags": [
           "webhooks"
+        ]
+      }
+    },
+    "/register": {
+      "post": {
+        "description": "Creates a local account. An invite_token allows signup when public registration is disabled and joins the invited teams atomically.",
+        "operationId": "auth-register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [],
+        "summary": "Register",
+        "tags": [
+          "auth"
         ]
       }
     },
@@ -12409,15 +13273,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -12620,14 +13482,92 @@
         ]
       }
     },
-    "/tasks/{projecttask}": {
+    "/tasks/{task_id}/time-entries": {
+      "get": {
+        "description": "Returns the time entries logged against the given task, across all users, paginated. Scoped to what you can read: an inaccessible or unknown task yields an empty list, not an error.",
+        "operationId": "task-time-entries-list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "1-based page number.",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number.",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
+            "explode": false,
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Search query; filters the list to items matching this string.",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Search query; filters the list to items matching this string.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedTimeEntry"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List a task's time entries",
+        "tags": [
+          "time-entries"
+        ]
+      }
+    },
+    "/tasks/{task}": {
       "delete": {
         "description": "Deletes a task. Requires write access to its project.",
         "operationId": "tasks-delete",
         "parameters": [
           {
             "in": "path",
-            "name": "projecttask",
+            "name": "task",
             "required": true,
             "schema": {
               "format": "int64",
@@ -12662,7 +13602,7 @@
           {
             "description": "The numeric id of the task.",
             "in": "path",
-            "name": "projecttask",
+            "name": "task",
             "required": true,
             "schema": {
               "description": "The numeric id of the task.",
@@ -12800,7 +13740,7 @@
         "parameters": [
           {
             "in": "path",
-            "name": "projecttask",
+            "name": "task",
             "required": true,
             "schema": {
               "format": "int64",
@@ -13303,7 +14243,7 @@
         "parameters": [
           {
             "in": "path",
-            "name": "projecttask",
+            "name": "task",
             "required": true,
             "schema": {
               "format": "int64",
@@ -13363,14 +14303,14 @@
         ]
       }
     },
-    "/tasks/{projecttask}/assignees": {
+    "/tasks/{task}/assignees": {
       "get": {
         "description": "Returns the users assigned to the given task, paginated. Requires read access to the task. Pass q to filter assignees by username.",
         "operationId": "task-assignees-list",
         "parameters": [
           {
             "in": "path",
-            "name": "projecttask",
+            "name": "task",
             "required": true,
             "schema": {
               "format": "int64",
@@ -13391,15 +14331,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -13448,7 +14386,7 @@
         "parameters": [
           {
             "in": "path",
-            "name": "projecttask",
+            "name": "task",
             "required": true,
             "schema": {
               "format": "int64",
@@ -13494,14 +14432,14 @@
         ]
       }
     },
-    "/tasks/{projecttask}/assignees/bulk": {
+    "/tasks/{task}/assignees/bulk": {
       "put": {
         "description": "Replaces the task's full assignee set with the users in the body: users not in the list are unassigned, new ones are added. Pass an empty array to unassign everyone. Each assignee must have access to the task's project, and the caller needs write access to the task.",
         "operationId": "task-assignees-bulk",
         "parameters": [
           {
             "in": "path",
-            "name": "projecttask",
+            "name": "task",
             "required": true,
             "schema": {
               "format": "int64",
@@ -13547,14 +14485,14 @@
         ]
       }
     },
-    "/tasks/{projecttask}/assignees/{user}": {
+    "/tasks/{task}/assignees/{user}": {
       "delete": {
         "description": "Un-assigns a user from the given task, identified by their user id in the path. Requires write access to the task.",
         "operationId": "task-assignees-delete",
         "parameters": [
           {
             "in": "path",
-            "name": "projecttask",
+            "name": "task",
             "required": true,
             "schema": {
               "format": "int64",
@@ -13592,407 +14530,6 @@
         ]
       }
     },
-    "/tasks/{projecttask}/duplicate": {
-      "post": {
-        "description": "Copies a task — including its labels, assignees, attachments and reminders — into the same project, and records a \"copied from\" relation back to the original. The authenticated user needs read access to the source task and write access to its project. Returns the newly created duplicate.",
-        "operationId": "tasks-duplicate",
-        "parameters": [
-          {
-            "description": "The numeric id of the task to duplicate.",
-            "in": "path",
-            "name": "projecttask",
-            "required": true,
-            "schema": {
-              "description": "The numeric id of the task to duplicate.",
-              "format": "int64",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TaskDuplicate"
-                }
-              }
-            },
-            "description": "Created"
-          },
-          "default": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VikunjaErrorModel"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Duplicate a task",
-        "tags": [
-          "tasks"
-        ]
-      }
-    },
-    "/tasks/{projecttask}/labels": {
-      "get": {
-        "description": "Returns the labels attached to the given task, paginated. Requires read access to the task.",
-        "operationId": "task-labels-list",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "projecttask",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "type": "integer"
-            }
-          },
-          {
-            "description": "1-based page number.",
-            "explode": false,
-            "in": "query",
-            "name": "page",
-            "schema": {
-              "default": 1,
-              "description": "1-based page number.",
-              "format": "int64",
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          {
-            "description": "Items per page (max 1000).",
-            "explode": false,
-            "in": "query",
-            "name": "per_page",
-            "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
-              "format": "int64",
-              "maximum": 1000,
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          {
-            "description": "Search query; filters the list to items matching this string.",
-            "explode": false,
-            "in": "query",
-            "name": "q",
-            "schema": {
-              "description": "Search query; filters the list to items matching this string.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedLabelWithTaskID"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VikunjaErrorModel"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "List the labels on a task",
-        "tags": [
-          "labels"
-        ]
-      },
-      "post": {
-        "description": "Attaches an existing label to the given task. Requires write access to the task and access to the label. Fails if the label is already on the task.",
-        "operationId": "task-labels-create",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "projecttask",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LabelTask"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LabelTask"
-                }
-              }
-            },
-            "description": "Created"
-          },
-          "default": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VikunjaErrorModel"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Add a label to a task",
-        "tags": [
-          "labels"
-        ]
-      }
-    },
-    "/tasks/{projecttask}/labels/bulk": {
-      "put": {
-        "description": "Sets the task's labels to exactly the provided list: labels not in the list are removed, missing ones are added, unchanged ones are left alone. Requires write access to the task, and you must be able to see every label you attach. Returns the resulting label set.",
-        "operationId": "task-labels-bulk-replace",
-        "parameters": [
-          {
-            "description": "The numeric id of the task whose labels to replace.",
-            "in": "path",
-            "name": "projecttask",
-            "required": true,
-            "schema": {
-              "description": "The numeric id of the task whose labels to replace.",
-              "format": "int64",
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LabelTaskBulk"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LabelTaskBulk"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VikunjaErrorModel"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Replace all labels on a task",
-        "tags": [
-          "labels"
-        ]
-      }
-    },
-    "/tasks/{projecttask}/labels/{label}": {
-      "delete": {
-        "description": "Detaches a label from the given task. Requires write access to the task.",
-        "operationId": "task-labels-delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "projecttask",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "path",
-            "name": "label",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VikunjaErrorModel"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Remove a label from a task",
-        "tags": [
-          "labels"
-        ]
-      }
-    },
-    "/tasks/{projecttask}/read": {
-      "put": {
-        "description": "Clears the authenticated user's unread status for a task, dismissing the unread indicator raised by mentions and other task notifications. Idempotent: marking an already-read or inaccessible task succeeds as a no-op.",
-        "operationId": "tasks-mark-read",
-        "parameters": [
-          {
-            "description": "The numeric id of the task to mark as read.",
-            "in": "path",
-            "name": "projecttask",
-            "required": true,
-            "schema": {
-              "description": "The numeric id of the task to mark as read.",
-              "format": "int64",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TaskReadBodyBody"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VikunjaErrorModel"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Mark a task as read",
-        "tags": [
-          "tasks"
-        ]
-      }
-    },
-    "/tasks/{task_id}/time-entries": {
-      "get": {
-        "description": "Returns the time entries logged against the given task, across all users, paginated. Scoped to what you can read: an inaccessible or unknown task yields an empty list, not an error.",
-        "operationId": "task-time-entries-list",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "task_id",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "type": "integer"
-            }
-          },
-          {
-            "description": "1-based page number.",
-            "explode": false,
-            "in": "query",
-            "name": "page",
-            "schema": {
-              "default": 1,
-              "description": "1-based page number.",
-              "format": "int64",
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          {
-            "description": "Items per page (max 1000).",
-            "explode": false,
-            "in": "query",
-            "name": "per_page",
-            "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
-              "format": "int64",
-              "maximum": 1000,
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          {
-            "description": "Search query; filters the list to items matching this string.",
-            "explode": false,
-            "in": "query",
-            "name": "q",
-            "schema": {
-              "description": "Search query; filters the list to items matching this string.",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedTimeEntry"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VikunjaErrorModel"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "List a task's time entries",
-        "tags": [
-          "time-entries"
-        ]
-      }
-    },
     "/tasks/{task}/attachments": {
       "get": {
         "description": "Returns the attachment metadata for one task, paginated. Requires read access to the task. The file bytes are not included; fetch them from the download endpoint.",
@@ -14023,15 +14560,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -14117,7 +14652,8 @@
                 "type": "object"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "201": {
@@ -14325,15 +14861,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -14874,6 +15408,280 @@
         ]
       }
     },
+    "/tasks/{task}/duplicate": {
+      "post": {
+        "description": "Copies a task — including its labels, assignees, attachments and reminders — into the same project, and records a \"copied from\" relation back to the original. The authenticated user needs read access to the source task and write access to its project. Returns the newly created duplicate.",
+        "operationId": "tasks-duplicate",
+        "parameters": [
+          {
+            "description": "The numeric id of the task to duplicate.",
+            "in": "path",
+            "name": "task",
+            "required": true,
+            "schema": {
+              "description": "The numeric id of the task to duplicate.",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDuplicate"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Duplicate a task",
+        "tags": [
+          "tasks"
+        ]
+      }
+    },
+    "/tasks/{task}/labels": {
+      "get": {
+        "description": "Returns the labels attached to the given task, paginated. Requires read access to the task.",
+        "operationId": "task-labels-list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "1-based page number.",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number.",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
+            "explode": false,
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Search query; filters the list to items matching this string.",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Search query; filters the list to items matching this string.",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedLabelWithTaskID"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List the labels on a task",
+        "tags": [
+          "labels"
+        ]
+      },
+      "post": {
+        "description": "Attaches an existing label to the given task. Requires write access to the task and access to the label. Fails if the label is already on the task.",
+        "operationId": "task-labels-create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabelTask"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelTask"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add a label to a task",
+        "tags": [
+          "labels"
+        ]
+      }
+    },
+    "/tasks/{task}/labels/bulk": {
+      "put": {
+        "description": "Sets the task's labels to exactly the provided list: labels not in the list are removed, missing ones are added, unchanged ones are left alone. Requires write access to the task, and you must be able to see every label you attach. Returns the resulting label set.",
+        "operationId": "task-labels-bulk-replace",
+        "parameters": [
+          {
+            "description": "The numeric id of the task whose labels to replace.",
+            "in": "path",
+            "name": "task",
+            "required": true,
+            "schema": {
+              "description": "The numeric id of the task whose labels to replace.",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabelTaskBulk"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelTaskBulk"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Replace all labels on a task",
+        "tags": [
+          "labels"
+        ]
+      }
+    },
+    "/tasks/{task}/labels/{label}": {
+      "delete": {
+        "description": "Detaches a label from the given task. Requires write access to the task.",
+        "operationId": "task-labels-delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "label",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Remove a label from a task",
+        "tags": [
+          "labels"
+        ]
+      }
+    },
     "/tasks/{task}/position": {
       "put": {
         "description": "Sets where a task sorts within one of its project's views. The position is per view, so this only affects the view named by project_view_id. Requires write access to the task. Positions below the minimum spacing make the server recalculate every position in the view, so the returned value may differ from the one sent.",
@@ -14924,6 +15732,51 @@
           }
         },
         "summary": "Set a task's position in a view",
+        "tags": [
+          "tasks"
+        ]
+      }
+    },
+    "/tasks/{task}/read": {
+      "put": {
+        "description": "Clears the authenticated user's unread status for a task, dismissing the unread indicator raised by mentions and other task notifications. Idempotent: marking an already-read or inaccessible task succeeds as a no-op.",
+        "operationId": "tasks-mark-read",
+        "parameters": [
+          {
+            "description": "The numeric id of the task to mark as read.",
+            "in": "path",
+            "name": "task",
+            "required": true,
+            "schema": {
+              "description": "The numeric id of the task to mark as read.",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskReadBodyBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Mark a task as read",
         "tags": [
           "tasks"
         ]
@@ -15075,15 +15928,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -15788,15 +16639,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -16397,15 +17246,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -16587,15 +17434,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -16846,7 +17691,7 @@
                   "$schema": {
                     "description": "A URL to the JSON Schema for this object.",
                     "examples": [
-                      "/api/v2/schemas/BotUserReadBody.json"
+                      "/api/v2/schemas/BotUserUpdateBody.json"
                     ],
                     "format": "uri",
                     "readOnly": true,
@@ -16876,7 +17721,6 @@
                     "type": "integer"
                   },
                   "max_permission": {
-                    "description": "The maximum permission the requesting user has on this bot user (0=read, 1=read/write, 2=admin).",
                     "format": "int64",
                     "readOnly": true,
                     "type": "integer"
@@ -16886,7 +17730,7 @@
                     "type": "string"
                   },
                   "status": {
-                    "description": "The bot's status: 0=active, 2=disabled. Set to 2 to disable the bot, 0 to re-enable it.",
+                    "description": "The bot's status: 0=active, 2=disabled.",
                     "format": "int64",
                     "type": "integer"
                   },
@@ -16913,7 +17757,7 @@
                   "$schema": {
                     "description": "A URL to the JSON Schema for this object.",
                     "examples": [
-                      "/api/v2/schemas/BotUserReadBody.json"
+                      "/api/v2/schemas/BotUserUpdateBody.json"
                     ],
                     "format": "uri",
                     "readOnly": true,
@@ -16943,7 +17787,6 @@
                     "type": "integer"
                   },
                   "max_permission": {
-                    "description": "The maximum permission the requesting user has on this bot user (0=read, 1=read/write, 2=admin).",
                     "format": "int64",
                     "readOnly": true,
                     "type": "integer"
@@ -16953,7 +17796,7 @@
                     "type": "string"
                   },
                   "status": {
-                    "description": "The bot's status: 0=active, 2=disabled. Set to 2 to disable the bot, 0 to re-enable it.",
+                    "description": "The bot's status: 0=active, 2=disabled.",
                     "format": "int64",
                     "type": "integer"
                   },
@@ -17004,7 +17847,7 @@
         ]
       },
       "put": {
-        "description": "Updates an owned bot user's name, status, and username. Only the owner may update it. Use PATCH for a partial update.",
+        "description": "Replaces an owned bot user's name, status, and username; status is required. Only the owner may update it. Use PATCH for a partial update.",
         "operationId": "bots-update",
         "parameters": [
           {
@@ -17021,7 +17864,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BotUserReadBody"
+                "$ref": "#/components/schemas/BotUserUpdateBody"
               }
             }
           },
@@ -17262,8 +18105,15 @@
             },
             "description": "The data export as a zip file."
           },
-          "201": {
-            "description": "Created"
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
           }
         },
         "summary": "Download the data export",
@@ -17461,15 +18311,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -17578,7 +18426,8 @@
                 "type": "object"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -17873,8 +18722,224 @@
       }
     },
     "/user/settings/general": {
+      "get": {
+        "description": "Returns the same settings as the settings field of GET /user.",
+        "operationId": "user-settings-read",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserGeneralSettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get the current user's general settings",
+        "tags": [
+          "user"
+        ]
+      },
+      "patch": {
+        "description": "Partial update operation supporting both JSON Merge Patch & JSON Patch updates.",
+        "operationId": "patch-user-settings-read",
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/JsonPatchOp"
+                },
+                "type": [
+                  "array",
+                  "null"
+                ]
+              }
+            },
+            "application/merge-patch+json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "$schema": {
+                    "description": "A URL to the JSON Schema for this object.",
+                    "examples": [
+                      "/api/v2/schemas/UserGeneralSettings.json"
+                    ],
+                    "format": "uri",
+                    "readOnly": true,
+                    "type": "string"
+                  },
+                  "default_project_id": {
+                    "description": "Project a task is filed under when created without an explicit project.",
+                    "format": "int64",
+                    "type": "integer"
+                  },
+                  "discoverable_by_email": {
+                    "description": "If true, the user can be found when searching for their exact email.",
+                    "type": "boolean"
+                  },
+                  "discoverable_by_name": {
+                    "description": "If true, this user can be found by their name or parts of it when searching.",
+                    "type": "boolean"
+                  },
+                  "email_reminders_enabled": {
+                    "description": "If enabled, sends email reminders of tasks to the user.",
+                    "type": "boolean"
+                  },
+                  "extra_settings_links": {
+                    "additionalProperties": {},
+                    "description": "Additional settings links provided by the OpenID provider. Server-controlled.",
+                    "readOnly": true,
+                    "type": "object"
+                  },
+                  "frontend_settings": {
+                    "description": "Arbitrary settings used only by the frontend. Any JSON value; stored and returned verbatim."
+                  },
+                  "language": {
+                    "description": "The user's language.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "The full name of the user.",
+                    "type": "string"
+                  },
+                  "overdue_tasks_reminders_enabled": {
+                    "description": "If enabled, the user gets an email for their overdue tasks each morning.",
+                    "type": "boolean"
+                  },
+                  "overdue_tasks_reminders_time": {
+                    "description": "The time the daily overdue-tasks summary is sent, as HH:MM.",
+                    "type": "string"
+                  },
+                  "timezone": {
+                    "description": "The user's time zone, used to send task reminders in their local time.",
+                    "type": "string"
+                  },
+                  "week_start": {
+                    "description": "The day the week starts on: 0=sunday, 1=monday, … 6=saturday.",
+                    "format": "int64",
+                    "maximum": 6,
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "application/merge-patch+shorthand": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "$schema": {
+                    "description": "A URL to the JSON Schema for this object.",
+                    "examples": [
+                      "/api/v2/schemas/UserGeneralSettings.json"
+                    ],
+                    "format": "uri",
+                    "readOnly": true,
+                    "type": "string"
+                  },
+                  "default_project_id": {
+                    "description": "Project a task is filed under when created without an explicit project.",
+                    "format": "int64",
+                    "type": "integer"
+                  },
+                  "discoverable_by_email": {
+                    "description": "If true, the user can be found when searching for their exact email.",
+                    "type": "boolean"
+                  },
+                  "discoverable_by_name": {
+                    "description": "If true, this user can be found by their name or parts of it when searching.",
+                    "type": "boolean"
+                  },
+                  "email_reminders_enabled": {
+                    "description": "If enabled, sends email reminders of tasks to the user.",
+                    "type": "boolean"
+                  },
+                  "extra_settings_links": {
+                    "additionalProperties": {},
+                    "description": "Additional settings links provided by the OpenID provider. Server-controlled.",
+                    "readOnly": true,
+                    "type": "object"
+                  },
+                  "frontend_settings": {
+                    "description": "Arbitrary settings used only by the frontend. Any JSON value; stored and returned verbatim."
+                  },
+                  "language": {
+                    "description": "The user's language.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "The full name of the user.",
+                    "type": "string"
+                  },
+                  "overdue_tasks_reminders_enabled": {
+                    "description": "If enabled, the user gets an email for their overdue tasks each morning.",
+                    "type": "boolean"
+                  },
+                  "overdue_tasks_reminders_time": {
+                    "description": "The time the daily overdue-tasks summary is sent, as HH:MM.",
+                    "type": "string"
+                  },
+                  "timezone": {
+                    "description": "The user's time zone, used to send task reminders in their local time.",
+                    "type": "string"
+                  },
+                  "week_start": {
+                    "description": "The day the week starts on: 0=sunday, 1=monday, … 6=saturday.",
+                    "format": "int64",
+                    "maximum": 6,
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserActionMessageBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update the current user's general settings (partial)",
+        "tags": [
+          "user"
+        ]
+      },
       "put": {
-        "description": "Replaces the authenticated user's general settings (name, reminders, discoverability, default project, week start, language, timezone, frontend settings).",
+        "description": "Replaces the authenticated user's general settings (name, reminders, discoverability, default project, week start, language, timezone, frontend settings). Use PATCH to change only some of them; it merges into frontend_settings key by key.",
         "operationId": "user-update-settings",
         "requestBody": {
           "content": {
@@ -17916,7 +18981,7 @@
     },
     "/user/settings/token/caldav": {
       "get": {
-        "description": "Returns the authenticated user's CalDAV tokens. Only the id and creation date are returned — never the token value, which is shown once on creation.",
+        "description": "Returns the authenticated user's CalDAV tokens, oldest first. Only the id and creation date are returned — never the token value, which is shown once on creation.",
         "operationId": "caldav-tokens-list",
         "parameters": [
           {
@@ -17933,15 +18998,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }
@@ -18261,15 +19324,13 @@
             }
           },
           {
-            "description": "Items per page (max 1000).",
+            "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
             "explode": false,
             "in": "query",
             "name": "per_page",
             "schema": {
-              "default": 50,
-              "description": "Items per page (max 1000).",
+              "description": "Items per page. Defaults to the instance's configured maximum (service.maxitemsperpage, reported as max_items_per_page by /info) and is silently capped at it; asking for more is not an error.",
               "format": "int64",
-              "maximum": 1000,
               "minimum": 1,
               "type": "integer"
             }

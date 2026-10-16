@@ -1,11 +1,11 @@
 # Released under the MIT License.
 # Copyright, 2026, by Nathan Kidd.
 
-# Pinned to the release matching data/openapi-v2.json (API v2.6.0).
+# Pinned to the release matching data/openapi-v2.json (API v2.7.0).
 
 services:
   vikunja:
-    image: vikunja/vikunja:2.6.0
+    image: vikunja/vikunja:2.7.0
     ports:
       - "127.0.0.1:${VIKUNJA_PORT:-3466}:3456"
     environment:

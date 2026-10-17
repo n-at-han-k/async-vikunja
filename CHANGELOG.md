@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-17
+
 ### Added
 
 - Everything Vikunja v2.7.0 added to the document. Invite links are the admin's:
@@ -23,6 +25,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and a merge patch of their own rather than only arriving nested on the user.
 - `Async::Vikunja::Status#error_kind`, `#error_message` and `#failed?`, so a
   migration says how it failed rather than only that it finished.
+- Every download takes a block, and the body then arrives a chunk at a time
+  rather than as one string held in memory: `#download_attachment`, `#preview`,
+  `#avatar`, `#background`, `#totp_qrcode`, `#notifications_atom` and
+  `#download_export` hand the response to the block, so
+  `response.body.each{|chunk| out.write(chunk)}` writes a file of any size.
+  Without a block each of them answers with an `Async::Vikunja::Download` as
+  before.
+- An upload part's `:body` may be an open `IO`, a `StringIO` or a
+  `Protocol::HTTP::Body::Readable` as well as a string, in which case
+  `#upload_attachments`, `#upload_background` and `#upload_avatar` read it as it
+  goes on the wire rather than holding it. Several parts may share one `:name`,
+  which is how more than one file is attached in a single request.
+- `Async::Vikunja::Transfer`, the wrapper a `Download` uses: it asks for `*/*`
+  rather than JSON, and raises `Async::Vikunja::Failure` for an unsuccessful
+  response as every other request does.
 
 ### Changed
 
@@ -31,6 +48,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   used is now `{task}`, which changes no call this gem makes.
 - `docker-compose.yml` sets `VIKUNJA_SERVICE_SECRET`; `VIKUNJA_SERVICE_JWTSECRET`
   is deprecated and warns on start-up.
+
+### Fixed
+
+- An attachment read off a task or off an upload result is addressed at its own
+  published identifier, so `task.attachments.first.download` and `#delete` act
+  on that attachment rather than on the task, and the members of
+  `#upload_attachments`' `result.success` are addressed individually.
+- `Download#media_type` reads the body before the headers, so it answers with
+  the content type rather than `nil` when nothing has read `#bytes` yet.
+- An upload part carrying binary bytes no longer raises
+  `Encoding::CompatibilityError`: each part goes on the wire as binary rather
+  than being concatenated into one string with the headers.
 
 ## [1.0.0] - 2026-10-16
 
@@ -81,5 +110,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Async::Vikunja::VERSION`.
 - Requires Ruby 3.3 or later, and `async-rest` ~> 0.20.
 
-[Unreleased]: https://github.com/n-at-han-k/async-vikunja/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/n-at-han-k/async-vikunja/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/n-at-han-k/async-vikunja/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/n-at-han-k/async-vikunja/releases/tag/v1.0.0

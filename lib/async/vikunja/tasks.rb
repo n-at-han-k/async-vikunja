@@ -65,7 +65,7 @@ module Async
 
       def assignees = self.nested_list(User, self.value[:assignees])
 
-      def attachments = self.nested_list(TaskAttachment, self.value[:attachments])
+      def attachments = self.nested_list(TaskAttachment, self.value[:attachments], identify: "attachments/")
 
       def buckets = self.nested_list(Bucket, self.value[:buckets])
 
@@ -97,7 +97,7 @@ module Async
 
       def attachment(id) = TaskAttachment.new(@resource.with(path: "attachments/" + Vikunja.escape(id)))
 
-      def download_attachment(id) = Download.new(@resource.with(path: "attachments/" + Vikunja.escape(id)))
+      def download_attachment(id, &block) = Download.open(@resource.with(path: "attachments/" + Vikunja.escape(id)), &block)
 
       def create_comment(payload) = self.submit(TaskComment, @resource.with(path: "comments"), payload, identify: true)
 

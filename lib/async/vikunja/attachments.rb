@@ -25,9 +25,9 @@ module Async
 
       def file = self.nested(File, self.value[:file])
 
-      def download = Download.new(@resource)
+      def download(&block) = Download.open(@resource, &block)
 
-      def preview(size) = Download.new(@resource.with(parameters: {preview_size: size}))
+      def preview(size, &block) = Download.open(@resource.with(parameters: {preview_size: size}), &block)
 
       def delete = self.discard(@resource)
     end
@@ -39,7 +39,7 @@ module Async
     end
 
     class AttachmentUploadResult < Representation
-      def success = self.nested_list(TaskAttachment, self.value[:success])
+      def success = self.nested_list(TaskAttachment, self.value[:success], identify: true)
 
       def errors = self.nested_list(AttachmentUploadError, self.value[:errors])
     end

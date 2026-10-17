@@ -65,7 +65,7 @@ module Async
 
       def disable_totp(password:) = self.submit(Message, self.with(path: "user/settings/totp/disable"), {password: password})
 
-      def totp_qrcode = Download.new(self.with(path: "user/settings/totp/qrcode"))
+      def totp_qrcode(&block) = Download.open(self.with(path: "user/settings/totp/qrcode"), &block)
     end
   end
 end

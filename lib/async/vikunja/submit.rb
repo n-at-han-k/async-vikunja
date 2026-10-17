@@ -53,6 +53,18 @@ module Async
         self.submit(klass, resource, parts, method: method, through: UploadRepresentation)
       end
 
+      def fetch(klass, resource, payload = nil, method: :post, &block)
+        if block
+          self.with_retry do
+            klass.public_send(method, resource, payload) do |_target, response|
+              block.call(response)
+            end
+          end
+        else
+          self.submit(klass, resource, payload, method: method)
+        end
+      end
+
       def discard(resource, payload = nil, method: :delete)
         self.with_retry do
           Representation.public_send(method, resource, payload) do |target, response|

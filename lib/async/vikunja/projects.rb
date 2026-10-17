@@ -61,7 +61,7 @@ module Async
 
       def task_by_index(index) = TaskReadOneBody.new(@resource.with(path: "tasks/by-index/" + Vikunja.escape(index)))
 
-      def background = Download.new(@resource.with(path: "background"))
+      def background(&block) = Download.open(@resource.with(path: "background"), &block)
 
       def search_users(query) = UserSearchPage.new(@resource.with(path: "users/search", parameters: {q: query}))
 

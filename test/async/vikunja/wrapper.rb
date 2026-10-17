@@ -1,3 +1,5 @@
+require "tmpdir"
+
 require "async/vikunja"
 
 describe Async::Vikunja::Wrapper do
@@ -64,10 +66,16 @@ end
 describe Async::Vikunja::Multipart do
   let(:wrapper) {subject.new}
 
-  it "sends each part under the field name the document gives it" do
-    request = ::Protocol::HTTP::Request["POST", "/api/v2/tasks/1/attachments"]
+  let(:png) {"\x89PNG\r\n\x1A\n\x00\xFF\xD8".b}
 
-    wrapper.prepare_request(request, [{name: "files", filename: "note.txt", content_type: "text/plain", body: "hello"}])
+  def request_for(parts)
+    ::Protocol::HTTP::Request["POST", "/api/v2/tasks/1/attachments"].tap do |request|
+      wrapper.prepare_request(request, parts)
+    end
+  end
+
+  it "sends each part under the field name the document gives it" do
+    request = self.request_for([{name: "files", filename: "note.txt", content_type: "text/plain", body: "hello"}])
 
     expect(request.headers["content-type"]).to be(:start_with?, "multipart/form-data; boundary=")
 
@@ -76,6 +84,122 @@ describe Async::Vikunja::Multipart do
     expect(body).to be(:include?, "content-disposition: form-data; name=\"files\"; filename=\"note.txt\"")
     expect(body).to be(:include?, "content-type: text/plain")
     expect(body).to be(:include?, "hello")
+  end
+
+  it "sends no body where there is nothing to send" do
+    request = self.request_for(nil)
+
+    expect(request.body).to be_nil
+    expect(request.headers["content-type"]).to be_nil
+  end
+
+  it "asks for a document back, because an upload answers with one" do
+    request = self.request_for([{name: "files", body: "hello"}])
+
+    expect(request.headers["accept"]).to be == ["application/json"]
+  end
+
+  it "says a part is bytes where the caller does not say what it is" do
+    body = self.request_for([{name: "files", body: "hello"}]).body.join
+
+    expect(body).to be(:include?, "content-type: application/octet-stream")
+  end
+
+  it "closes the body with the final boundary" do
+    body = self.request_for([{name: "files", body: "hello"}]).body.join
+
+    expect(body).to be(:end_with?, "--" + subject::BOUNDARY + "--\r\n")
+  end
+
+  it "sends several parts under one field name" do
+    body = self.request_for([
+      {name: "files", filename: "a.txt", content_type: "text/plain", body: "first"},
+      {name: "files", filename: "b.txt", content_type: "text/plain", body: "second"},
+    ]).body.join
+
+    expect(body.scan("name=\"files\"").size).to be == 2
+    expect(body).to be(:include?, "first")
+    expect(body).to be(:include?, "second")
+  end
+
+  it "sends binary bytes as they are, rather than as a document" do
+    body = self.request_for([{name: "files", filename: "dot.png", content_type: "image/png", body: png}]).body.join
+
+    expect(body.encoding).to be == ::Encoding::BINARY
+    expect(body).to be(:include?, png)
+  end
+
+  it "sends binary bytes under a name the caller did not write in ASCII" do
+    body = self.request_for([{name: "files", filename: "café.png", content_type: "image/png", body: png}]).body.join
+
+    expect(body).to be(:include?, png)
+    expect(body).to be(:include?, "café.png".b)
+  end
+
+  it "sends a binary part beside a part whose text is not ASCII" do
+    body = self.request_for([
+      {name: "files", filename: "dot.png", content_type: "image/png", body: png},
+      {name: "files", filename: "note.txt", content_type: "text/plain", body: "café"},
+    ]).body.join
+
+    expect(body).to be(:include?, png)
+    expect(body).to be(:include?, "café".b)
+  end
+
+  with "a file too large to hold" do
+    let(:large) {"x" * 200_000}
+
+    let(:path) {::File.join(Dir.tmpdir, "async-vikunja-" + Process.pid.to_s + ".bin")}
+
+    def file_for(contents)
+      ::File.binwrite(path, contents)
+
+      ::File.open(path, ::File::RDONLY | ::File::BINARY)
+    end
+
+    after do
+      ::File.unlink(path)
+    rescue Errno::ENOENT
+      nil
+    end
+
+    it "sends the body a chunk at a time rather than as one string" do
+      request = self.request_for([{name: "files", filename: "big.bin", body: self.file_for(large)}])
+
+      chunks = []
+
+      request.body.each{|chunk| chunks << chunk.bytesize}
+
+      expect(chunks.size).to be > 1
+      expect(chunks.sum).to be == request.body.length
+    end
+
+    it "reads a file part from the file rather than into memory" do
+      file = self.file_for(large)
+
+      request = self.request_for([{name: "files", filename: "big.bin", content_type: "text/plain", body: file}])
+
+      expect(request.body.join).to be(:include?, large)
+      expect(file).to be(:closed?)
+    end
+
+    it "says how long the body is, so it need not be sent as chunks" do
+      preamble = self.request_for([{name: "files", filename: "big.bin", body: ""}]).body.length
+
+      request = self.request_for([{name: "files", filename: "big.bin", body: self.file_for(large)}])
+
+      expect(request.body.length).to be == preamble + large.bytesize
+    end
+
+    it "sends a string part as its own chunk, rather than inside one buffer" do
+      source = large.b
+      chunks = []
+
+      self.request_for([{name: "files", filename: "big.bin", body: source}]).body.each{|chunk| chunks << chunk}
+
+      expect(chunks).to be(:include?, source)
+      expect(chunks.map(&:bytesize)).to be == [134, large.bytesize, 2, 28]
+    end
   end
 end
 

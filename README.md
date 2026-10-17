@@ -175,21 +175,69 @@ vikunja.project(1).search_users("test").map(&:username)
 vikunja.project(1).remove_user("tester")
 ```
 
+Bytes go up as they are, so read a file in binary and say what it is. Several parts may share
+one field name.
+
 ```ruby
 result = vikunja.task(7).upload_attachments([
-  {name: "files", filename: "notes.txt", content_type: "text/plain", body: File.read("notes.txt")},
+  {name: "files", filename: "notes.txt", content_type: "text/plain", body: File.binread("notes.txt")},
+  {name: "files", filename: "diagram.png", content_type: "image/png", body: File.binread("diagram.png")},
 ])
 
 result.success.map{|attachment| attachment.file.name}
 result.errors.map(&:message)
+```
+
+An attachment knows its own address wherever it arrived, so it downloads and deletes itself.
+
+```ruby
+stored = result.success.first
+
+stored.download.bytes
+stored.delete
 
 vikunja.task(7).task_attachments.map{|attachment| attachment.file.size}
-vikunja.task(7).download_attachment(3).bytes
+vikunja.task(7).attachments.map{|attachment| attachment.download.bytes.bytesize}
+```
+
+A download is the bytes the API answered with, not a document. It is fetched when it is first
+read, and the headers arrive with it.
+
+```ruby
+file = vikunja.task(7).download_attachment(3)
+
+file.media_type
+file.bytes
+
+vikunja.task(7).attachment(3).preview("sm").bytes
 vikunja.task(7).attachment(3).delete
 ```
 
+A file is as large as it is. Give a download a block and the body arrives a chunk at a time, so
+nothing holds the whole of it:
+
 ```ruby
-vikunja.project(1).upload_background({name: "background", filename: "wall.jpg", content_type: "image/jpeg", body: File.read("wall.jpg")})
+File.open("notes.txt", "wb") do |out|
+  vikunja.task(7).download_attachment(3) do |response|
+    response.body.each{|chunk| out.write(chunk)}
+  end
+end
+```
+
+Every download takes a block the same way: `avatar`, `background`, `preview`, `totp_qrcode`,
+`notifications_atom` and `download_export`.
+
+An upload streams the other way. Hand a part an open file rather than its bytes, and it is read
+from disk as it goes on the wire:
+
+```ruby
+vikunja.task(7).upload_attachments([
+  {name: "files", filename: "recording.mp4", content_type: "video/mp4", body: File.open("recording.mp4", "rb")},
+])
+```
+
+```ruby
+vikunja.project(1).upload_background({name: "background", filename: "wall.jpg", content_type: "image/jpeg", body: File.binread("wall.jpg")})
 
 background = vikunja.project(1).background
 
@@ -248,7 +296,7 @@ vikunja.create_caldav_token.token
 ```ruby
 vikunja.user.settings.timezone
 vikunja.update_settings({name: "Tester", week_start: 1, timezone: "Europe/London"}).message
-vikunja.upload_avatar({name: "avatar", filename: "me.png", content_type: "image/png", body: File.read("me.png")})
+vikunja.upload_avatar({name: "avatar", filename: "me.png", content_type: "image/png", body: File.binread("me.png")})
 vikunja.avatar("tester", size: 64).bytes
 vikunja.set_avatar_provider(avatar_provider: "initials")
 

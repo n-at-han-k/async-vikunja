@@ -79,7 +79,7 @@ module Async
 
       def users(query) = UserSearchPage.new(self.with(path: "users", parameters: {q: query}))
 
-      def avatar(username, **parameters) = Download.new(self.with(path: "avatar/" + Vikunja.escape(username), parameters: parameters))
+      def avatar(username, **parameters, &block) = Download.open(self.with(path: "avatar/" + Vikunja.escape(username), parameters: parameters), &block)
 
       def timezones = Representation.new(self.with(path: "user/timezones"))
 
@@ -95,7 +95,7 @@ module Async
 
       def request_export(password:) = self.submit(Message, self.with(path: "user/export/request"), {password: password})
 
-      def download_export(password:) = self.submit(Download, self.with(path: "user/export/download"), {password: password})
+      def download_export(password:, &block) = self.fetch(Download, self.with(path: "user/export/download"), {password: password}, &block)
 
       def request_deletion(password:) = self.discard(self.with(path: "user/deletion/request"), {password: password}, method: :post)
 

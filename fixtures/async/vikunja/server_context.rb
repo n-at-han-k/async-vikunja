@@ -37,9 +37,16 @@ module Async
             [404, {message: "no such route: " + path}, {}]
           end
 
+          case body
+          when ::String
+            chunk = body
+          else
+            chunk = ::JSON.dump(body)
+          end
+
           ::Protocol::HTTP::Response[status,
             {"content-type" => "application/json"}.merge(extra || {}),
-            [::JSON.dump(body)]]
+            [chunk]]
         end
       end
 

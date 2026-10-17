@@ -131,7 +131,7 @@ module Async
 
       def routes = Representation.new(self.with(path: "routes"))
 
-      def notifications_atom = Download.new(self.with(path: "notifications.atom"))
+      def notifications_atom(&block) = Download.open(self.with(path: "notifications.atom"), &block)
     end
   end
 end

@@ -41,15 +41,15 @@ module Async
         end
       end
 
-      def nested(klass, value)
+      def nested(klass, value, identify: nil)
         if value
-          klass.new(@resource, value: value, metadata: self.metadata)
+          klass.new(self.identified(@resource, identify, value), value: value, metadata: self.metadata)
         end
       end
 
-      def nested_list(klass, values)
+      def nested_list(klass, values, identify: nil)
         Array(values).map do |value|
-          self.nested(klass, value)
+          self.nested(klass, value, identify: identify)
         end
       end
     end
@@ -63,11 +63,25 @@ module Async
     end
 
     class Download < Representation
-      WRAPPER = Wrapper.new
+      WRAPPER = Transfer.new
+
+      def self.open(resource, &block)
+        if block
+          self.get(resource) do |_resource, response, _klass|
+            block.call(response)
+          end
+        else
+          self.new(resource)
+        end
+      end
 
       def bytes = self.value
 
-      def media_type = self.metadata["content-type"]
+      def media_type
+        self.bytes
+
+        self.metadata["content-type"]
+      end
     end
   end
 end

@@ -1,3 +1,5 @@
+require "tmpdir"
+
 require "async/vikunja/live_context"
 
 describe Async::Vikunja::Client do
@@ -150,6 +152,159 @@ describe Async::Vikunja::Client do
       ensure
         vikunja.project(project.id).delete
       end
+    end
+  end
+
+  with "an attachment" do
+    let(:png) {"\x89PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x02\x00\x00\x00\x02\b\x02\x00\x00\x00\xFD\xD4\x9As\x00\x00\x00\x10IDATx\x9Cc\xF8\xCF\xC0\x00D\f\x10\n\x00\x1F\xEE\x03\xFD\x8B_\x14\xD4\x00\x00\x00\x00IEND\xAEB`\x82".b}
+
+    let(:text) {{name: "files", filename: "note.txt", content_type: "text/plain", body: "the bytes of a file"}}
+
+    let(:image) {{name: "files", filename: "café.png", content_type: "image/png", body: png}}
+
+    def stored_as(result, name) = result.success.find{|attachment| attachment.file.name == name}
+
+    it "uploads several files at once and downloads each one byte for byte" do
+      project = vikunja.create_project({title: self.unique("attachments")})
+
+      begin
+        task = vikunja.task(project.create_task({title: "attached"}).id)
+
+        result = task.upload_attachments([text, image])
+
+        expect(result.errors).to be == []
+        expect(result.success.size).to be == 2
+
+        stored_text = self.stored_as(result, "note.txt")
+        stored_image = self.stored_as(result, "café.png")
+
+        expect(stored_text.file.size).to be == 19
+        expect(stored_image.file.mime).to be == "image/png"
+        expect(stored_image.file.size).to be == png.bytesize
+
+        expect(stored_text.download.bytes).to be == "the bytes of a file"
+        expect(stored_text.download.media_type).to be(:start_with?, "text/plain")
+
+        expect(stored_image.download.bytes.b).to be == png
+        expect(stored_image.download.media_type).to be == "image/png"
+      ensure
+        vikunja.project(project.id).delete
+      end
+    end
+
+    it "identifies an attachment at its own address, however it arrived" do
+      project = vikunja.create_project({title: self.unique("attachment-address")})
+
+      begin
+        task = vikunja.task(project.create_task({title: "attached"}).id)
+        stored = task.upload_attachments([text]).success.first
+
+        listed = vikunja.task(task.id).task_attachments.first
+        nested = vikunja.task(task.id).attachments.first
+
+        address = "/attachments/" + stored.id.to_s
+
+        [stored, listed, nested].each do |attachment|
+          expect(attachment.id).to be == stored.id
+          expect(attachment.resource.reference.path.to_s).to be(:end_with?, address)
+          expect(attachment.download.bytes).to be == "the bytes of a file"
+        end
+      ensure
+        vikunja.project(project.id).delete
+      end
+    end
+
+    it "deletes an attachment without deleting the task it is on" do
+      project = vikunja.create_project({title: self.unique("attachment-delete")})
+
+      begin
+        task = vikunja.task(project.create_task({title: "attached"}).id)
+        task.upload_attachments([text])
+
+        expect(vikunja.task(task.id).attachments.first.delete).to be == true
+
+        expect(vikunja.task(task.id).title).to be == "attached"
+        expect(vikunja.task(task.id).task_attachments.to_a).to be(:empty?)
+      ensure
+        vikunja.project(project.id).delete
+      end
+    end
+
+    it "streams a large file up from disk and back down a chunk at a time" do
+      project = vikunja.create_project({title: self.unique("streaming")})
+      path = ::File.join(Dir.tmpdir, self.unique("async-vikunja") + ".bin")
+
+      begin
+        ::File.binwrite(path, "x" * 2_000_000)
+
+        task = vikunja.task(project.create_task({title: "streamed"}).id)
+
+        stored = task.upload_attachments([
+          {name: "files", filename: "big.bin", content_type: "application/octet-stream",
+           body: ::File.open(path, ::File::RDONLY | ::File::BINARY)},
+        ]).success.first
+
+        expect(stored.file.size).to be == 2_000_000
+
+        chunks = []
+
+        stored.download do |response|
+          response.body.each{|chunk| chunks << chunk.bytesize}
+        end
+
+        expect(chunks.size).to be > 1
+        expect(chunks.sum).to be == 2_000_000
+      ensure
+        ::File.unlink(path)
+        vikunja.project(project.id).delete
+      end
+    end
+
+    it "downloads a preview the server sized for it" do
+      project = vikunja.create_project({title: self.unique("attachment-preview")})
+
+      begin
+        task = vikunja.task(project.create_task({title: "attached"}).id)
+        stored = task.upload_attachments([image]).success.first
+
+        preview = stored.preview("sm")
+
+        expect(preview.bytes.bytesize).to be > 0
+        expect(preview.media_type).to be(:start_with?, "image/")
+      ensure
+        vikunja.project(project.id).delete
+      end
+    end
+  end
+
+  with "a project background" do
+    let(:png) {"\x89PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x02\x00\x00\x00\x02\b\x02\x00\x00\x00\xFD\xD4\x9As\x00\x00\x00\x10IDATx\x9Cc\xF8\xCF\xC0\x00D\f\x10\n\x00\x1F\xEE\x03\xFD\x8B_\x14\xD4\x00\x00\x00\x00IEND\xAEB`\x82".b}
+
+    it "uploads an image and downloads what the server made of it" do
+      project = vikunja.create_project({title: self.unique("background")})
+
+      begin
+        updated = vikunja.project(project.id)
+          .upload_background({name: "background", filename: "dot.png", content_type: "image/png", body: png})
+
+        expect(updated.background_information).not.to be_nil
+
+        background = vikunja.project(project.id).background
+
+        expect(background.media_type).to be(:start_with?, "image/")
+        expect(background.bytes.bytesize).to be > 0
+      ensure
+        vikunja.project(project.id).delete
+      end
+    end
+  end
+
+  with "an avatar" do
+    it "downloads the one the instance serves for a user" do
+      avatar = vikunja.avatar(vikunja.user.username, size: 48)
+
+      expect(avatar.bytes.bytesize).to be > 0
+      expect(avatar.media_type).not.to be_nil
     end
   end
 

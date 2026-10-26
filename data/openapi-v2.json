@@ -707,7 +707,7 @@
             "type": "string"
           },
           "fields": {
-            "description": "The names of the task fields to apply from values; only these fields are written, the rest of each task is left untouched.",
+            "description": "The names of the task fields to apply from values; only these fields are written, the rest of each task is left untouched. Besides the task columns, assignees, reminders and is_favorite may be named. At least one field is required.",
             "items": {
               "type": "string"
             },
@@ -3312,7 +3312,7 @@
           },
           "filter": {
             "$ref": "#/components/schemas/TaskCollection",
-            "description": "The filter query used to match tasks shown in this view. See https://vikunja.io/docs/filters."
+            "description": "The filter query used to match tasks shown in this view. Combine conditions with && or || (not and/or) and group them with parentheses. Operators: =, !=, >, >=, <, <=, like, in, not in. See https://vikunja.io/docs/filters."
           },
           "id": {
             "description": "The unique, numeric id of this view. Set by the server.",
@@ -3361,7 +3361,7 @@
         "properties": {
           "filter": {
             "$ref": "#/components/schemas/TaskCollection",
-            "description": "The filter query that decides which tasks land in this bucket. See https://vikunja.io/docs/filters."
+            "description": "The filter query that decides which tasks land in this bucket. Combine conditions with && or || (not and/or) and group them with parentheses. Operators: =, !=, >, >=, <, <=, like, in, not in. See https://vikunja.io/docs/filters."
           },
           "title": {
             "description": "The title of the bucket this configuration creates.",
@@ -3419,7 +3419,7 @@
           },
           "filter": {
             "$ref": "#/components/schemas/TaskCollection",
-            "description": "The filter query used to match tasks shown in this view. See https://vikunja.io/docs/filters."
+            "description": "The filter query used to match tasks shown in this view. Combine conditions with && or || (not and/or) and group them with parentheses. Operators: =, !=, >, >=, <, <=, like, in, not in. See https://vikunja.io/docs/filters."
           },
           "id": {
             "description": "The unique, numeric id of this view. Set by the server.",
@@ -4111,6 +4111,17 @@
             "readOnly": true,
             "type": "number"
           },
+          "positions": {
+            "description": "The task's stored position in each view of its project. Only present in create and duplicate responses.",
+            "items": {
+              "$ref": "#/components/schemas/TaskPosition"
+            },
+            "readOnly": true,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "priority": {
             "format": "int64",
             "type": "integer"
@@ -4300,7 +4311,7 @@
         "additionalProperties": false,
         "properties": {
           "filter": {
-            "description": "The filter query to match tasks by. See https://vikunja.io/docs/filters.",
+            "description": "The filter query to match tasks by, e.g. \"done = false && due_date < now+7d\". Combine conditions with && or || (not and/or) and group them with parentheses. Operators: =, !=, >, >=, <, <=, like, in, not in. See https://vikunja.io/docs/filters.",
             "type": "string"
           },
           "filter_include_nulls": {
@@ -4690,6 +4701,17 @@
             "format": "double",
             "readOnly": true,
             "type": "number"
+          },
+          "positions": {
+            "description": "The task's stored position in each view of its project. Only present in create and duplicate responses.",
+            "items": {
+              "$ref": "#/components/schemas/TaskPosition"
+            },
+            "readOnly": true,
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "priority": {
             "format": "int64",
@@ -5488,6 +5510,10 @@
           "password": {
             "description": "The current user's password, required to disable totp.",
             "type": "string"
+          },
+          "totp_passcode": {
+            "description": "A current passcode from the user's authenticator, required to disable totp.",
+            "type": "string"
           }
         },
         "type": "object"
@@ -5506,6 +5532,29 @@
           },
           "passcode": {
             "description": "The current totp passcode, used to confirm the authenticator is set up correctly.",
+            "type": "string"
+          },
+          "password": {
+            "description": "The current user's password, required to enable totp.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TotpEnrollBodyBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "/api/v2/schemas/TotpEnrollBodyBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "password": {
+            "description": "The current user's password, required to enroll into totp.",
             "type": "string"
           }
         },
@@ -6286,7 +6335,7 @@
             "type": "integer"
           },
           "project_id": {
-            "description": "The id of the project this webhook target belongs to. Set from the URL, not the body.",
+            "description": "The id of the project this webhook target belongs to.",
             "format": "int64",
             "readOnly": true,
             "type": "integer"
@@ -6307,7 +6356,7 @@
             "type": "string"
           },
           "user_id": {
-            "description": "The id of the user if this is a user-level webhook (mutually exclusive with project_id).",
+            "description": "The id of the user if this is a user-level webhook (mutually exclusive with project_id). Set from the route, not the body.",
             "format": "int64",
             "readOnly": true,
             "type": "integer"
@@ -6338,7 +6387,7 @@
   "info": {
     "description": "## Rich-text fields\n\nDescriptions (task, project, label, team, saved filter) and task comments are stored as HTML. Add `?format=markdown` to read and write them as GFM Markdown instead; on write it is converted to HTML and `@mentions` resolved to existing users. On `PATCH`, send the `X-Vikunja-Format: markdown` header instead (merge-patch drops query parameters). CalDAV always exchanges task descriptions as Markdown.\n\nWriting is lossy: Markdown can't express every HTML construct (e.g. underline), so a field you send as Markdown is stored as its converted HTML — formatting Markdown can't represent is dropped. Omit a field, or use `format=html`, to leave it untouched (note a full `PUT` and `PATCH` round-trip the whole resource, so send `format=html` unless you actually edited the rich-text fields). Unknown `@mentions` stay as plain text.",
     "title": "Vikunja API",
-    "version": "v2.7.0"
+    "version": "v2.7.1"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -7162,13 +7211,13 @@
             }
           },
           {
-            "description": "Desired avatar edge length in pixels. Clamped to the server's configured maximum if larger; providers that render fixed-size images may ignore it.",
+            "description": "Desired avatar edge length in pixels. Rounded up to 16, 32, 48, 64, 128, 256, 512 or 1024 and capped at the server's configured maximum; providers that render fixed-size images may ignore it.",
             "explode": false,
             "in": "query",
             "name": "size",
             "schema": {
               "default": 250,
-              "description": "Desired avatar edge length in pixels. Clamped to the server's configured maximum if larger; providers that render fixed-size images may ignore it.",
+              "description": "Desired avatar edge length in pixels. Rounded up to 16, 32, 48, 64, 128, 256, 512 or 1024 and capped at the server's configured maximum; providers that render fixed-size images may ignore it.",
               "format": "int64",
               "minimum": 1,
               "type": "integer"
@@ -10098,7 +10147,7 @@
     },
     "/projects/{project}/backgrounds/upload": {
       "put": {
-        "description": "Uploads an image via multipart/form-data under the \"background\" field and sets it as the project's background. Requires write access to the project. The image is resized server-side and stored as JPEG; it replaces any previous background (idempotent replace, hence PUT). Returns the updated project.",
+        "description": "Uploads an image via multipart/form-data under the \"background\" field and sets it as the project's background. Requires write access to the project. The image is resized server-side and stored as JPEG; it replaces any previous background (idempotent replace, hence PUT). Returns the updated project. A file that is not a decodable image of a supported format fails with 400, an image over the pixel limit fails with 400 and code 4032, and the request fails with 503 and code 4037 when the server is too busy decoding other images.",
         "operationId": "projects-background-upload",
         "parameters": [
           {
@@ -10501,12 +10550,12 @@
             }
           },
           {
-            "description": "Filter query to match tasks by. See https://vikunja.io/docs/filters.",
+            "description": "Filter query to match tasks by, e.g. \"done = false && due_date < now+7d\". Combine conditions with && or || (not and/or) and group them with parentheses. Operators: =, !=, >, >=, <, <=, like, in, not in. See https://vikunja.io/docs/filters.",
             "explode": false,
             "in": "query",
             "name": "filter",
             "schema": {
-              "description": "Filter query to match tasks by. See https://vikunja.io/docs/filters.",
+              "description": "Filter query to match tasks by, e.g. \"done = false && due_date < now+7d\". Combine conditions with && or || (not and/or) and group them with parentheses. Operators: =, !=, >, >=, <, <=, like, in, not in. See https://vikunja.io/docs/filters.",
               "type": "string"
             }
           },
@@ -11814,7 +11863,7 @@
                     "type": "integer"
                   },
                   "filter": {
-                    "description": "The filter query used to match tasks shown in this view. See https://vikunja.io/docs/filters."
+                    "description": "The filter query used to match tasks shown in this view. Combine conditions with && or || (not and/or) and group them with parentheses. Operators: =, !=, >, >=, <, <=, like, in, not in. See https://vikunja.io/docs/filters."
                   },
                   "id": {
                     "description": "The unique, numeric id of this view. Set by the server.",
@@ -11909,7 +11958,7 @@
                     "type": "integer"
                   },
                   "filter": {
-                    "description": "The filter query used to match tasks shown in this view. See https://vikunja.io/docs/filters."
+                    "description": "The filter query used to match tasks shown in this view. Combine conditions with && or || (not and/or) and group them with parentheses. Operators: =, !=, >, >=, <, <=, like, in, not in. See https://vikunja.io/docs/filters."
                   },
                   "id": {
                     "description": "The unique, numeric id of this view. Set by the server.",
@@ -12261,12 +12310,12 @@
             }
           },
           {
-            "description": "Filter query to match tasks by. See https://vikunja.io/docs/filters.",
+            "description": "Filter query to match tasks by, e.g. \"done = false && due_date < now+7d\". Combine conditions with && or || (not and/or) and group them with parentheses. Operators: =, !=, >, >=, <, <=, like, in, not in. See https://vikunja.io/docs/filters.",
             "explode": false,
             "in": "query",
             "name": "filter",
             "schema": {
-              "description": "Filter query to match tasks by. See https://vikunja.io/docs/filters.",
+              "description": "Filter query to match tasks by, e.g. \"done = false && due_date < now+7d\". Combine conditions with && or || (not and/or) and group them with parentheses. Operators: =, !=, >, >=, <, <=, like, in, not in. See https://vikunja.io/docs/filters.",
               "type": "string"
             }
           },
@@ -12647,12 +12696,12 @@
             }
           },
           {
-            "description": "Filter query to match tasks by. See https://vikunja.io/docs/filters.",
+            "description": "Filter query to match tasks by, e.g. \"done = false && due_date < now+7d\". Combine conditions with && or || (not and/or) and group them with parentheses. Operators: =, !=, >, >=, <, <=, like, in, not in. See https://vikunja.io/docs/filters.",
             "explode": false,
             "in": "query",
             "name": "filter",
             "schema": {
-              "description": "Filter query to match tasks by. See https://vikunja.io/docs/filters.",
+              "description": "Filter query to match tasks by, e.g. \"done = false && due_date < now+7d\". Combine conditions with && or || (not and/or) and group them with parentheses. Operators: =, !=, >, >=, <, <=, like, in, not in. See https://vikunja.io/docs/filters.",
               "type": "string"
             }
           },
@@ -12778,7 +12827,7 @@
     },
     "/projects/{project}/webhooks": {
       "get": {
-        "description": "Returns the webhook targets configured for the given project, paginated. Requires read access to the project. Secret and basic-auth credentials are never included.",
+        "description": "Returns the webhook targets configured for the given project, paginated. Requires write access to the project, because target URLs often carry the receiver's credential. Secret and basic-auth credentials are never included.",
         "operationId": "webhooks-list",
         "parameters": [
           {
@@ -13295,12 +13344,12 @@
             }
           },
           {
-            "description": "Filter query to match tasks by. See https://vikunja.io/docs/filters.",
+            "description": "Filter query to match tasks by, e.g. \"done = false && due_date < now+7d\". Combine conditions with && or || (not and/or) and group them with parentheses. Operators: =, !=, >, >=, <, <=, like, in, not in. See https://vikunja.io/docs/filters.",
             "explode": false,
             "in": "query",
             "name": "filter",
             "schema": {
-              "description": "Filter query to match tasks by. See https://vikunja.io/docs/filters.",
+              "description": "Filter query to match tasks by, e.g. \"done = false && due_date < now+7d\". Combine conditions with && or || (not and/or) and group them with parentheses. Operators: =, !=, >, >=, <, <=, like, in, not in. See https://vikunja.io/docs/filters.",
               "type": "string"
             }
           },
@@ -13904,6 +13953,12 @@
                     "readOnly": true,
                     "type": "number"
                   },
+                  "positions": {
+                    "description": "The task's stored position in each view of its project. Only present in create and duplicate responses.",
+                    "items": {},
+                    "readOnly": true,
+                    "type": "array"
+                  },
                   "priority": {
                     "format": "int64",
                     "type": "integer"
@@ -14126,6 +14181,12 @@
                     "format": "double",
                     "readOnly": true,
                     "type": "number"
+                  },
+                  "positions": {
+                    "description": "The task's stored position in each view of its project. Only present in create and duplicate responses.",
+                    "items": {},
+                    "readOnly": true,
+                    "type": "array"
                   },
                   "priority": {
                     "format": "int64",
@@ -14732,7 +14793,7 @@
         ]
       },
       "get": {
-        "description": "Returns the raw bytes of one attachment. Requires read access to the task. Pass preview_size to get a downscaled PNG preview instead — only for image attachments; for non-images or an unknown size the original file is returned. The Content-Type header carries the file's real mime type.",
+        "description": "Returns the raw bytes of one attachment. Requires read access to the task. For a downscaled image, use the preview endpoint.",
         "operationId": "task-attachments-download",
         "parameters": [
           {
@@ -14755,22 +14816,6 @@
               "description": "The id of the attachment to download.",
               "format": "int64",
               "type": "integer"
-            }
-          },
-          {
-            "description": "If set and the attachment is an image, return a downscaled PNG preview instead of the original: sm=100px, md=200px, lg=400px, xl=800px. Ignored for non-image attachments.",
-            "explode": false,
-            "in": "query",
-            "name": "preview_size",
-            "schema": {
-              "description": "If set and the attachment is an image, return a downscaled PNG preview instead of the original: sm=100px, md=200px, lg=400px, xl=800px. Ignored for non-image attachments.",
-              "enum": [
-                "sm",
-                "md",
-                "lg",
-                "xl"
-              ],
-              "type": "string"
             }
           }
         ],
@@ -14799,6 +14844,98 @@
           }
         },
         "summary": "Download a task attachment",
+        "tags": [
+          "task"
+        ]
+      }
+    },
+    "/tasks/{task}/attachments/{attachment}/preview": {
+      "get": {
+        "description": "Returns a downscaled preview of an image attachment, as a JPEG or, when the image has transparency, as a PNG. Requires read access to the task. Never returns the original: when no preview can be made of the attachment (not an image, undecodable, or too large) the request fails with 422 and code 4038. Fails with 503 and code 4037 when the server is too busy generating other previews.",
+        "operationId": "task-attachments-preview",
+        "parameters": [
+          {
+            "description": "The id of the task the attachment belongs to.",
+            "in": "path",
+            "name": "task",
+            "required": true,
+            "schema": {
+              "description": "The id of the task the attachment belongs to.",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "The id of the attachment to preview.",
+            "in": "path",
+            "name": "attachment",
+            "required": true,
+            "schema": {
+              "description": "The id of the attachment to preview.",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "The width of the preview: sm=100px, md=200px, lg=400px, xl=800px. Smaller images are not upscaled.",
+            "explode": false,
+            "in": "query",
+            "name": "size",
+            "required": true,
+            "schema": {
+              "description": "The width of the preview: sm=100px, md=200px, lg=400px, xl=800px. Smaller images are not upscaled.",
+              "enum": [
+                "sm",
+                "md",
+                "lg",
+                "xl"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "contentMediaType": "application/octet-stream",
+                  "format": "binary",
+                  "type": "string"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "contentMediaType": "application/octet-stream",
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "The preview image bytes."
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "The attachment has no preview (code 4038), or size is missing or invalid."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VikunjaErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a preview of a task attachment",
         "tags": [
           "task"
         ]
@@ -18400,7 +18537,7 @@
     },
     "/user/settings/avatar": {
       "put": {
-        "description": "Uploads an image as the authenticated user's avatar and switches their avatar provider to \"upload\". The image is validated to be an image, resized server-side, and stored as PNG. Replaces any previously uploaded avatar (idempotent replace, hence PUT).",
+        "description": "Uploads an image as the authenticated user's avatar and switches their avatar provider to \"upload\". The image is validated to be an image, resized server-side, and stored as PNG. Replaces any previously uploaded avatar (idempotent replace, hence PUT). An image the server cannot decode fails with 400, an image over the pixel limit fails with 400 and code 4032, and the request fails with 503 and code 4037 when the server is too busy decoding other images.",
         "operationId": "user-avatar-upload",
         "requestBody": {
           "content": {
@@ -19150,7 +19287,7 @@
     },
     "/user/settings/totp/disable": {
       "post": {
-        "description": "Removes all totp settings for the authenticated user. Requires the current password for confirmation. Local accounts only.",
+        "description": "Removes all totp settings for the authenticated user. Requires the current password and a current totp passcode. Wrong passwords and passcodes are throttled per user (429). Local accounts only.",
         "operationId": "totp-disable",
         "requestBody": {
           "content": {
@@ -19192,7 +19329,7 @@
     },
     "/user/settings/totp/enable": {
       "post": {
-        "description": "Activates a previously enrolled totp setting by confirming a passcode. All existing sessions are invalidated. Local accounts only.",
+        "description": "Activates a previously enrolled totp setting by confirming a passcode. Requires the current password; wrong passwords are throttled per user (429). All existing sessions are invalidated. Local accounts only.",
         "operationId": "totp-enable",
         "requestBody": {
           "content": {
@@ -19234,8 +19371,18 @@
     },
     "/user/settings/totp/enroll": {
       "post": {
-        "description": "Creates the totp secret for the authenticated user. The setup must still be confirmed via the enable endpoint before it takes effect. Local accounts only.",
+        "description": "Creates the totp secret for the authenticated user. Requires the current password; wrong passwords are throttled per user (429). The setup must still be confirmed via the enable endpoint before it takes effect. Local accounts only.",
         "operationId": "totp-enroll",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TotpEnrollBodyBody"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
